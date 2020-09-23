@@ -1,6 +1,5 @@
-require "dvdvrconv/version"
+require "open3"
 
-module Dvdvrconv
-  class Error < StandardError; end
-  # Your code goes here...
-end
+require_relative "dvdvrconv/command"
+require_relative "dvdvrconv/dvdvr"
+require_relative "dvdvrconv/version"
