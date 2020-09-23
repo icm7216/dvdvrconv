@@ -1,11 +1,39 @@
 require "test_helper"
 
-class DvdvrconvTest < Minitest::Test
-  def test_that_it_has_a_version_number
-    refute_nil ::Dvdvrconv::VERSION
+class DvdvrconvTest < Test::Unit::TestCase
+  self.test_order = :defined
+
+  sub_test_case "read dvd-vr info" do
+    setup do
+      @dvd = Dvdvrconv::Dvdvr.new
+      @dvd.dvdvr_opts = "test/DVD_RTAV//VR_MANGR.IFO"
+      @dvd.read_info
+      @num = @dvd.num
+      @title = @dvd.title
+      # @dvd.view_info
+    end
+
+    test "read num" do
+      assert_equal [["1"], ["2"], ["3"]], @num
+    end
+
+    test "read title" do
+      assert_equal [["TEST1"], ["TEST2"], ["TEST3"]], @title
+    end
   end
 
-  def test_it_does_something_useful
-    assert false
+  sub_test_case "Replace white space in the title with underscore" do
+    setup do
+      dummy_title = [["TEST 1"], ["TEST 2"], ["TEST 3"]]
+
+      @dvd = Dvdvrconv::Dvdvr.new
+      @dvd.dvdvr_opts = "test/DVD_RTAV//VR_MANGR.IFO"
+      @dvd.read_info
+      @dvd.instance_variable_set("@title", dummy_title)
+    end
+
+    test "read titles with underscore" do
+      assert_equal ["TEST_1", "TEST_2", "TEST_3"], @dvd.adjust_title
+    end
   end
 end
