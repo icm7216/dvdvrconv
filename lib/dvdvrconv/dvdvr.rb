@@ -43,12 +43,24 @@ module Dvdvrconv
     end
 
     def adjust_title
+      # Extract duplicate names from title
+      dup = @title.select { |x| @title.count(x) > 1 }
+
+      # Add sequential numbers to duplicate names
       output_title = []
+      dup_counter = 0
 
       @title.each_index do |idx|
         # Replace white space in the title with underscore
         new_name = @title[idx][0].gsub(/\s/, "_")
-        output_title << format("%s", new_name)
+
+        if dup.include?(title[idx])
+          dup_counter += 1
+          output_title << format("%s_%02d", new_name, dup_counter)
+        else
+          output_title << format("%s", new_name)
+        end
+        dup_counter = 0 if dup_counter == title.count(title[idx])
       end
 
       output_title

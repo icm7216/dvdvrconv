@@ -36,4 +36,19 @@ class DvdvrconvTest < Test::Unit::TestCase
       assert_equal ["TEST_1", "TEST_2", "TEST_3"], @dvd.adjust_title
     end
   end
+
+  sub_test_case "Add sequential numbers to duplicate names" do
+    setup do
+      dummy_title = [["TEST"], ["TEST"], ["TEST"]]
+
+      @dvd = Dvdvrconv::Dvdvr.new
+      @dvd.dvdvr_opts = "test/DVD_RTAV//VR_MANGR.IFO"
+      @dvd.read_info
+      @dvd.instance_variable_set("@title", dummy_title)
+    end
+
+    test "read titles with underscore" do
+      assert_equal ["TEST_01", "TEST_02", "TEST_03"], @dvd.adjust_title
+    end
+  end
 end
