@@ -22,33 +22,33 @@ class DvdvrconvTest < Test::Unit::TestCase
     end
   end
 
-  sub_test_case "Replace white space in the title with underscore" do
+  sub_test_case "Adjust title name" do
     setup do
-      dummy_title = [["TEST 1"], ["TEST 2"], ["TEST 3"]]
-
       @dvd = Dvdvrconv::Dvdvr.new
       @dvd.dvdvr_opts = "test/DVD_RTAV//VR_MANGR.IFO"
       @dvd.read_info
-      @dvd.instance_variable_set("@title", dummy_title)
     end
 
-    test "read titles with underscore" do
-      assert_equal ["TEST_1", "TEST_2", "TEST_3"], @dvd.adjust_title
-    end
-  end
+    data(
+      "Replace white space in the title with underscor" => [
+        [["TEST 1"], ["TEST 2"], ["TEST 3"]],
+        ["TEST_1", "TEST_2", "TEST_3"],
+      ],
+      "Add sequential numbers to duplicate names" => [
+        [["TEST"], ["TEST"], ["TEST"]],
+        ["TEST_01", "TEST_02", "TEST_03"],
+      ],
+      "Mixed white space and duplicate names" => [
+        [["TEST 1"], ["TEST 2"], ["TEST 3"], ["TEST"], ["TEST"], ["TEST"], ["foo"], ["foo"], ["foo"]],
+        ["TEST_1", "TEST_2", "TEST_3", "TEST_01", "TEST_02", "TEST_03", "foo_01", "foo_02", "foo_03"],
+      ],
+    )
 
-  sub_test_case "Add sequential numbers to duplicate names" do
-    setup do
-      dummy_title = [["TEST"], ["TEST"], ["TEST"]]
-
-      @dvd = Dvdvrconv::Dvdvr.new
-      @dvd.dvdvr_opts = "test/DVD_RTAV//VR_MANGR.IFO"
-      @dvd.read_info
-      @dvd.instance_variable_set("@title", dummy_title)
-    end
-
-    test "read titles with underscore" do
-      assert_equal ["TEST_01", "TEST_02", "TEST_03"], @dvd.adjust_title
+    def test_adjust_title(data)
+      target, expected = data
+      @dvd.instance_variable_set("@title", target)
+      actual = @dvd.adjust_title
+      assert_equal(expected, actual)
     end
   end
 end
