@@ -39,8 +39,8 @@ class DvdvrconvTest < Test::Unit::TestCase
         ["TEST_01", "TEST_02", "TEST_03"],
       ],
       "Mixed white space and duplicate names" => [
-        [["TEST 1"], ["TEST 2"], ["TEST 3"], ["TEST"], ["TEST"], ["TEST"], ["foo"], ["foo"], ["foo"]],
-        ["TEST_1", "TEST_2", "TEST_3", "TEST_01", "TEST_02", "TEST_03", "foo_01", "foo_02", "foo_03"],
+        [["TEST 1"], ["TEST 2"], ["TEST 3"], ["T EST"], ["T EST"], ["T EST"], ["foo"], ["foo"], ["foo"]],
+        ["TEST_1", "TEST_2", "TEST_3", "T_EST_01", "T_EST_02", "T_EST_03", "foo_01", "foo_02", "foo_03"],
       ],
     )
 
