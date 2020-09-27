@@ -1,25 +1,29 @@
 module Dvdvrconv
   class Dvdvr
-    attr_accessor :dvdvr_opts
-    attr_reader :num, :title, :date, :size
+    attr_accessor :dvdvr_opts_ifo, :dvdvr_opts_vro
+    attr_reader :num, :title, :date, :size, :base_name
 
     def initialize
       %w(header num title date size).each do |item|
         self.instance_variable_set("@#{item}", "")
       end
 
+      @base_name = "DVD"
+
       if RUBY_PLATFORM =~ /mswin(?!ce)|mingw|cygwin/
-        @dvdvr_opts = "/cygdrive/D/DVD_RTAV/VR_MANGR.IFO"
+        @dvdvr_opts_ifo = "/cygdrive/D/DVD_RTAV/VR_MANGR.IFO"
+        @dvdvr_opts_vro = "/cygdrive/D/DVD_RTAV/VR_MOVIE.VRO"
         @dvdvr_cmd = "win/dvd-vr.exe"
       else
-        @dvdvr_opts = "/mnt/d/DVD_RTAV/VR_MANGR.IFO"
+        @dvdvr_opts_ifo = "/mnt/d/DVD_RTAV/VR_MANGR.IFO"
+        @dvdvr_opts_vro = "/mnt/d/DVD_RTAV/VR_MOVIE.VRO"
         @dvdvr_cmd = "dvd-vr"
       end
     end
 
     def read_info
       # Read info from DVD-RAM
-      out, err, status = Open3.capture3(@dvdvr_cmd, @dvdvr_opts)
+      out, err, status = Open3.capture3(@dvdvr_cmd, @dvdvr_opts_ifo)
       @header = out.scan(/^(.*?)Number/m)
 
       %w(num title date size).each do |item|
@@ -64,6 +68,54 @@ module Dvdvrconv
       end
 
       output_title
+    end
+
+    def vro2vob
+      # read VRO file, and output vob files
+      cmd = %Q(#{@dvdvr_cmd} --name=#{@base_name} #{@dvdvr_opts_ifo} #{@dvdvr_opts_vro})
+      puts "----- convert file VRO to VOB -----"
+      puts "> cmd:\n  #{cmd}"
+      system(cmd)
+    end
+
+    def customize_title(base_dst_name, number_list = [])
+      output_title = []
+
+      base_dst_name.size.times do |x|
+        break if x > @title.size - 1
+        src = format("%s#%03d", @base_name, x + 1) + ".vob"
+
+        case base_dst_name
+        when Array
+          dst_name = base_dst_name[x]
+        when String
+          if number_list.size.zero?
+            dst_name = base_dst_name + format("_%02d", x + 1)
+          else
+            dst_name = base_dst_name + format("_%02d", number_list[x])
+          end
+        end
+
+        dst = dst_name + ".vob"
+        output_title << [src, dst]
+      end
+
+      output_title
+    end
+
+    def rename_vob(file_titles)
+      puts "----- output vob file -----"
+
+      file_titles.each do |file_title|
+        src, dst = file_title
+
+        if File.exist?("#{dst}")
+          puts "Skip => file #{dst} is exist."
+        else
+          File.rename(src, dst)
+          puts "  file name: #{dst}"
+        end
+      end
     end
   end
 end
