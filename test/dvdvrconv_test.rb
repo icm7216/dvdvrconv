@@ -6,7 +6,7 @@ class DvdvrconvTest < Test::Unit::TestCase
   sub_test_case "read dvd-vr info" do
     setup do
       @dvd = Dvdvrconv::Dvdvr.new
-      @dvd.dvdvr_opts = "test/DVD_RTAV//VR_MANGR.IFO"
+      @dvd.dvdvr_opts_ifo = "test/DVD_RTAV/VR_MANGR.IFO"
       @dvd.read_info
       @num = @dvd.num
       @title = @dvd.title
@@ -25,29 +25,64 @@ class DvdvrconvTest < Test::Unit::TestCase
   sub_test_case "Adjust title name" do
     setup do
       @dvd = Dvdvrconv::Dvdvr.new
-      @dvd.dvdvr_opts = "test/DVD_RTAV//VR_MANGR.IFO"
+      @dvd.dvdvr_opts_ifo = "test/DVD_RTAV/VR_MANGR.IFO"
       @dvd.read_info
     end
 
     data(
       "Replace white space in the title with underscor" => [
-        [["TEST 1"], ["TEST 2"], ["TEST 3"]],
         ["TEST_1", "TEST_2", "TEST_3"],
+        [["TEST 1"], ["TEST 2"], ["TEST 3"]],
       ],
       "Add sequential numbers to duplicate names" => [
+        ["TEST_01", "TEST_02", "TEST_03"],        
         [["TEST"], ["TEST"], ["TEST"]],
-        ["TEST_01", "TEST_02", "TEST_03"],
       ],
       "Mixed white space and duplicate names" => [
-        [["TEST 1"], ["TEST 2"], ["TEST 3"], ["T EST"], ["T EST"], ["T EST"], ["foo"], ["foo"], ["foo"]],
         ["TEST_1", "TEST_2", "TEST_3", "T_EST_01", "T_EST_02", "T_EST_03", "foo_01", "foo_02", "foo_03"],
+        [["TEST 1"], ["TEST 2"], ["TEST 3"], ["T EST"], ["T EST"], ["T EST"], ["foo"], ["foo"], ["foo"]],
       ],
     )
 
     def test_adjust_title(data)
-      target, expected = data
+      expected, target = data
       @dvd.instance_variable_set("@title", target)
       actual = @dvd.adjust_title
+      assert_equal(expected, actual)
+    end
+  end
+
+  sub_test_case "customize title name" do
+    setup do
+      @dvd = Dvdvrconv::Dvdvr.new
+      @dvd.dvdvr_opts_ifo = "test/DVD_RTAV//VR_MANGR.IFO"
+      @dvd.read_info
+    end
+
+    data(
+      "Specify individual file names." => [
+        ["name_one.vob", "name_two.vob", "name_three.vob"],
+        { base_dst_name: ["name_one", "name_two", "name_three"], 
+          number_list: [] },
+      ],
+      "Add sequence number." => [
+        ["name_01.vob", "name_02.vob", "name_03.vob"],
+        { base_dst_name: "name", 
+          number_list: [] },
+      ],
+      "Specify sequence numbers individually." => [
+        ["name_11.vob", "name_12.vob", "name_13.vob"],
+        { base_dst_name: "name", 
+          number_list: [11, 12, 13] },
+      ],
+    )
+
+    def test_customize_title(data)
+      expected, target = data
+      base_dst_name = target[:base_dst_name]
+      number_list = target[:number_list]
+      titles = @dvd.customize_title(base_dst_name, number_list)
+      actual = titles.transpose[1]
       assert_equal(expected, actual)
     end
   end
