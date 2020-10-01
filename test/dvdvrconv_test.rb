@@ -35,7 +35,7 @@ class DvdvrconvTest < Test::Unit::TestCase
         [["TEST 1"], ["TEST 2"], ["TEST 3"]],
       ],
       "Add sequential numbers to duplicate names" => [
-        ["TEST_01", "TEST_02", "TEST_03"],        
+        ["TEST_01", "TEST_02", "TEST_03"],
         [["TEST"], ["TEST"], ["TEST"]],
       ],
       "Mixed white space and duplicate names" => [
@@ -47,7 +47,7 @@ class DvdvrconvTest < Test::Unit::TestCase
     def test_adjust_title(data)
       expected, target = data
       @dvd.instance_variable_set("@title", target)
-      actual = @dvd.adjust_title
+      actual, dup = @dvd.adjust_title
       assert_equal(expected, actual)
     end
   end
@@ -62,17 +62,17 @@ class DvdvrconvTest < Test::Unit::TestCase
     data(
       "Specify individual file names." => [
         ["name_one.vob", "name_two.vob", "name_three.vob"],
-        { base_dst_name: ["name_one", "name_two", "name_three"], 
+        { base_dst_name: ["name_one", "name_two", "name_three"],
           number_list: [] },
       ],
       "Add sequence number." => [
         ["name_01.vob", "name_02.vob", "name_03.vob"],
-        { base_dst_name: "name", 
+        { base_dst_name: "name",
           number_list: [] },
       ],
       "Specify sequence numbers individually." => [
         ["name_11.vob", "name_12.vob", "name_13.vob"],
-        { base_dst_name: "name", 
+        { base_dst_name: "name",
           number_list: [11, 12, 13] },
       ],
     )
@@ -83,6 +83,33 @@ class DvdvrconvTest < Test::Unit::TestCase
       number_list = target[:number_list]
       titles = @dvd.customize_title(base_dst_name, number_list)
       actual = titles.transpose[1]
+      assert_equal(expected, actual)
+    end
+  end
+
+  sub_test_case "concat list" do
+    setup do
+      @dvd = Dvdvrconv::Dvdvr.new
+    end
+
+    data(
+      "make concat list for ffmpeg." => [
+        [["concat_T_EST.txt",
+          "file 'T_EST_01.vob'\nfile 'T_EST_02.vob'\nfile 'T_EST_03.vob'\n",
+          "T_EST"],
+         ["concat_foo.txt",
+          "file 'foo_01.vob'\nfile 'foo_02.vob'\nfile 'foo_03.vob'\n",
+          "foo"]],
+        { output_title: ["TEST_1", "TEST_2", "TEST_3", "T_EST_01", "T_EST_02", "T_EST_03", "foo_01", "foo_02", "foo_03"],
+          duplicate_name: ["T_EST", "foo"] },
+      ],
+    )
+
+    def test_concat_list(data)
+      expected, target = data
+      output_title = target[:output_title]
+      duplicate_name = target[:duplicate_name]
+      actual = @dvd.make_concat_list(output_title, duplicate_name)
       assert_equal(expected, actual)
     end
   end
