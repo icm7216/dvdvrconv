@@ -133,10 +133,10 @@ module Dvdvrconv
 
     # Rename vob file to a customized title name.
     #
-    # @param [String] output_title is Array. Includes pair of source and destination filename.
+    # @param [String] file_titles is Array. Includes pair of source and destination filename.
     #   *  [[src, dst], [src, dst], [src, dst], ....]
     #
-    def rename_vob(output_title)
+    def rename_vob(file_titles)
       puts "----- output vob file -----"
 
       file_titles.each do |file_title|
