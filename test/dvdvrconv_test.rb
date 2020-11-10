@@ -6,10 +6,10 @@ class DvdvrconvTest < Test::Unit::TestCase
   sub_test_case "read dvd-vr info" do
     setup do
       @dvd = Dvdvrconv::Dvdvr.new
-      @dvd.dvdvr_opts_ifo = "test/DVD_RTAV/VR_MANGR.IFO"
+      @dvd.vrdisc.opts_ifo = "test/DVD_RTAV/VR_MANGR.IFO"
       @dvd.read_info
-      @num = @dvd.num
-      @title = @dvd.title
+      @num = @dvd.vrdisc.num
+      @title = @dvd.vrdisc.title
       # @dvd.view_info
     end
 
@@ -25,7 +25,7 @@ class DvdvrconvTest < Test::Unit::TestCase
   sub_test_case "Adjust title name" do
     setup do
       @dvd = Dvdvrconv::Dvdvr.new
-      @dvd.dvdvr_opts_ifo = "test/DVD_RTAV/VR_MANGR.IFO"
+      @dvd.vrdisc.opts_ifo = "test/DVD_RTAV/VR_MANGR.IFO"
       @dvd.read_info
     end
 
@@ -46,8 +46,9 @@ class DvdvrconvTest < Test::Unit::TestCase
 
     def test_adjust_title(data)
       expected, target = data
-      @dvd.instance_variable_set("@title", target)
-      actual, dup = @dvd.adjust_title
+      @dvd.vrdisc.title = target
+      @dvd.adjust_title
+      actual = @dvd.vrdisc.output_title
       assert_equal(expected, actual)
     end
   end
@@ -55,7 +56,7 @@ class DvdvrconvTest < Test::Unit::TestCase
   sub_test_case "customize title name" do
     setup do
       @dvd = Dvdvrconv::Dvdvr.new
-      @dvd.dvdvr_opts_ifo = "test/DVD_RTAV//VR_MANGR.IFO"
+      @dvd.vrdisc.opts_ifo = "test/DVD_RTAV//VR_MANGR.IFO"
       @dvd.read_info
     end
 
@@ -107,9 +108,9 @@ class DvdvrconvTest < Test::Unit::TestCase
 
     def test_concat_list(data)
       expected, target = data
-      output_title = target[:output_title]
-      duplicate_name = target[:duplicate_name]
-      actual = @dvd.make_concat_list(output_title, duplicate_name)
+      @dvd.vrdisc.output_title = target[:output_title]
+      @dvd.vrdisc.duplicate_name = target[:duplicate_name]
+      actual = @dvd.make_concat_list
       assert_equal(expected, actual)
     end
   end

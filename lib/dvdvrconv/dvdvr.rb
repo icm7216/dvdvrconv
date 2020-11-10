@@ -1,35 +1,48 @@
 module Dvdvrconv
+
+  # DVD-VR disc status
+  Vrdisc = Struct.new(
+    :header,          # @param [String]
+    :num,             # @param [Array<String>]
+    :title,           # @param [Array<String>]
+    :date,            # @param [Array<String>]
+    :size,            # @param [Array<String>]
+    :opts_ifo,        # @param [String]
+    :opts_vro,        # @param [String]
+    :cmd,             # @param [String]
+    :output_title,    # @param [Array<String>]
+    :duplicate_name,  # @param [Array<String>]
+    :vob_titles,       # @param [Array<String>]
+  )
+
+  BASE_NAME = "DVD"
+
   class Dvdvr
-    attr_accessor :dvdvr_opts_ifo, :dvdvr_opts_vro
-    attr_reader :num, :title, :date, :size, :base_name
+    attr_accessor :vrdisc
 
     def initialize
-      %w(header num title date size).each do |item|
-        self.instance_variable_set("@#{item}", "")
-      end
-
-      @base_name = "DVD"
+      @vrdisc = Vrdisc.new(nil)
 
       if RUBY_PLATFORM =~ /mswin(?!ce)|mingw|cygwin/
-        @dvdvr_opts_ifo = "/cygdrive/D/DVD_RTAV/VR_MANGR.IFO"
-        @dvdvr_opts_vro = "/cygdrive/D/DVD_RTAV/VR_MOVIE.VRO"
-        @dvdvr_cmd = "win/dvd-vr.exe"
+        @vrdisc.opts_ifo = "/cygdrive/D/DVD_RTAV/VR_MANGR.IFO"
+        @vrdisc.opts_vro = "/cygdrive/D/DVD_RTAV/VR_MOVIE.VRO"
+        @vrdisc.cmd = "win/dvd-vr.exe"
       else
-        @dvdvr_opts_ifo = "/mnt/d/DVD_RTAV/VR_MANGR.IFO"
-        @dvdvr_opts_vro = "/mnt/d/DVD_RTAV/VR_MOVIE.VRO"
-        @dvdvr_cmd = "dvd-vr"
+        @vrdisc.opts_ifo = "/mnt/d/DVD_RTAV/VR_MANGR.IFO"
+        @vrdisc.opts_vro = "/mnt/d/DVD_RTAV/VR_MOVIE.VRO"
+        @vrdisc.cmd = "dvd-vr"
       end
     end
 
     # Read video information from dvd-ram discs in dvd-vr format.
     def read_info
-      out, err, status = Open3.capture3(@dvdvr_cmd, @dvdvr_opts_ifo)
-      @header = out.scan(/^(.*?)Number/m)
+      out, err, status = Open3.capture3(@vrdisc.cmd, @vrdisc.opts_ifo)
+      @vrdisc.header = out.scan(/^(.*?)Number/m)
 
       # Sets the captured item to an instance variable.
       %w(num title date size).each do |item|
         str = format("%-5s", item) + ":"
-        self.instance_variable_set("@#{item}", out.scan(/#{str}\s(.*?)$/))
+        @vrdisc[item] = out.scan(/#{str}\s(.*?)$/)
       end
 
       out
@@ -38,8 +51,8 @@ module Dvdvrconv
     # View video information from dvd-ram discs in dvd-vr format.
     def view_info
       puts "----- view dvd-vr info -----"
-      puts @header
-      [@num, @title, @date, @size].transpose.each do |x|
+      puts @vrdisc.header
+      [@vrdisc.num, @vrdisc.title, @vrdisc.date, @vrdisc.size].transpose.each do |x|
         %w(num title date size).each_with_index do |item, idx|
           line = format("%-5s", item) + ": #{x.flatten[idx].to_s}\n"
           puts line
@@ -56,33 +69,33 @@ module Dvdvrconv
       dup_counter = 0
 
       # Extract duplicate names from title.
-      dup = @title.select { |x| @title.count(x) > 1 }
+      dup = @vrdisc.title.select { |x| @vrdisc.title.count(x) > 1 }
 
-      @title.each_index do |idx|
+      @vrdisc.title.each_index do |idx|
         # Replace white space in the title with underscore.
-        new_name = @title[idx][0].gsub(/\s/, "_")
+        new_name = @vrdisc.title[idx][0].gsub(/\s/, "_")
 
         # Add sequential numbers to duplicate name.
-        if dup.include?(title[idx])
+        if dup.include?(@vrdisc.title[idx])
           dup_counter += 1
           output_title << format("%s_%02d", new_name, dup_counter)
           duplicate_names << new_name
         else
           output_title << format("%s", new_name)
         end
-        dup_counter = 0 if dup_counter == title.count(title[idx])
+        dup_counter = 0 if dup_counter == @vrdisc.title.count(@vrdisc.title[idx])
       end
 
-      duplicate_name = duplicate_names.select do |x|
+      @vrdisc.duplicate_name = duplicate_names.select do |x|
         duplicate_names.count(x) > 1
       end.uniq
 
-      [output_title, duplicate_name]
+      @vrdisc.output_title = output_title
     end
 
     # Read VRO file from dvd-ram discs in dvd-vr format, and output vob files.
     def vro2vob
-      cmd = %Q(#{@dvdvr_cmd} --name=#{@base_name} #{@dvdvr_opts_ifo} #{@dvdvr_opts_vro})
+      cmd = %Q(#{@vrdisc.cmd} --name=#{Dvdvrconv::BASE_NAME} #{@vrdisc.opts_ifo} #{@vrdisc.opts_vro})
       puts "----- convert file VRO to VOB -----"
       puts "> cmd:\n  #{cmd}"
       system(cmd)
@@ -107,11 +120,11 @@ module Dvdvrconv
     #   number_list = [12, 13, 14, 15]
     #
     def customize_title(base_dst_name, number_list = [])
-      output_title = []
+      vob_titles = []
 
       base_dst_name.size.times do |x|
-        break if x > @title.size - 1
-        src = format("%s#%03d", @base_name, x + 1) + ".vob"
+        break if x > @vrdisc.title.size - 1
+        src = format("%s#%03d", Dvdvrconv::BASE_NAME, x + 1) + ".vob"
 
         case base_dst_name
         when Array
@@ -125,10 +138,10 @@ module Dvdvrconv
         end
 
         dst = dst_name + ".vob"
-        output_title << [src, dst]
+        vob_titles << [src, dst]
       end
 
-      output_title
+      @vrdisc.vob_titles = vob_titles
     end
 
     # Rename vob file to a customized title name.
@@ -136,10 +149,10 @@ module Dvdvrconv
     # @param [String] file_titles is Array. Includes pair of source and destination filename.
     #   *  [[src, dst], [src, dst], [src, dst], ....]
     #
-    def rename_vob(file_titles)
+    def rename_vob
       puts "----- output vob file -----"
 
-      file_titles.each do |file_title|
+      @vrdisc.vob_titles.each do |file_title|
         src, dst = file_title
 
         if File.exist?("#{dst}")
@@ -152,14 +165,14 @@ module Dvdvrconv
     end
 
     # Make a list of file names to concatenate.
-    def make_concat_list(output_title, duplicate_name)
+    def make_concat_list
       concat_list = []
 
-      duplicate_name.each do |base_name|
+      @vrdisc.duplicate_name.each do |base_name|
         contents = ""
         file_name = "concat_#{base_name}.txt"
 
-        names = output_title.select { |x| x.match(/#{base_name}_\d\d/) }
+        names = @vrdisc.output_title.select { |x| x.match(/#{base_name}_\d\d/) }
         names.each { |line| contents += %Q[file '#{line}.vob'\n] }
         concat_list << [file_name, contents, base_name]
       end
@@ -202,7 +215,7 @@ module Dvdvrconv
     #   * Change the aspect ratio to 16:9.
     #   * Delete a closed caption.
     def vob2mp4
-      vob_titles = @title.uniq.map { |x| x[0].gsub(/\s/, "_") }
+      vob_titles = @vrdisc.title.uniq.map { |x| x[0].gsub(/\s/, "_") }
 
       vob_titles.each do |file_name|
         if File.exist?("#{file_name}.mp4")
