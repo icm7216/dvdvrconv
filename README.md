@@ -29,7 +29,9 @@ $ gem install dvdvrconv
 
 ## Usage
 
-TODO: Write usage instructions here
+TODO:
+*  Write usage instructions here
+*  Add command options
 
 ## Development
 
