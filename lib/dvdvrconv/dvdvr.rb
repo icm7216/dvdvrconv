@@ -12,10 +12,16 @@ module Dvdvrconv
     :cmd,             # @param [String]
     :output_title,    # @param [Array<String>]
     :duplicate_name,  # @param [Array<String>]
-    :vob_titles,       # @param [Array<String>]
+    :vob_titles,      # @param [Array<String>]
   )
 
   BASE_NAME = "DVD"
+  WIN_DRV_IFO = "/cygdrive/D/DVD_RTAV/VR_MANGR.IFO"
+  WIN_DRV_VRO = "/cygdrive/D/DVD_RTAV/VR_MOVIE.VRO"
+  WIN_DRV_CMD = "win/dvd-vr.exe"
+  DRV_IFO = "/mnt/d/DVD_RTAV/VR_MANGR.IFO"
+  DRV_VRO = "/mnt/d/DVD_RTAV/VR_MOVIE.VRO"
+  DRV_CMD = "dvd-vr"
 
   class Dvdvr
     attr_accessor :vrdisc
@@ -24,14 +30,31 @@ module Dvdvrconv
       @vrdisc = Vrdisc.new(nil)
 
       if RUBY_PLATFORM =~ /mswin(?!ce)|mingw|cygwin/
-        @vrdisc.opts_ifo = "/cygdrive/D/DVD_RTAV/VR_MANGR.IFO"
-        @vrdisc.opts_vro = "/cygdrive/D/DVD_RTAV/VR_MOVIE.VRO"
-        @vrdisc.cmd = "win/dvd-vr.exe"
+        @vrdisc.opts_ifo = Dvdvrconv::WIN_DRV_IFO
+        @vrdisc.opts_vro = Dvdvrconv::WIN_DRV_VRO
+        @vrdisc.cmd = Dvdvrconv::WIN_DRV_CMD
       else
-        @vrdisc.opts_ifo = "/mnt/d/DVD_RTAV/VR_MANGR.IFO"
-        @vrdisc.opts_vro = "/mnt/d/DVD_RTAV/VR_MOVIE.VRO"
-        @vrdisc.cmd = "dvd-vr"
+        @vrdisc.opts_ifo = Dvdvrconv::DRV_IFO
+        @vrdisc.opts_vro = Dvdvrconv::DRV_VRO
+        @vrdisc.cmd = Dvdvrconv::DRV_CMD
       end
+    end
+
+    # Read VRO file from dvd-ram disc in dvd-vr format, and output vob files.
+    def str_dvdvr_cmd
+      %Q[#{@vrdisc.cmd} --name=#{Dvdvrconv::BASE_NAME} #{@vrdisc.opts_ifo} #{@vrdisc.opts_vro}]
+    end
+
+    # Make a concatenation command string for FFmpeg.
+    def str_concat_cmd(file_name, base_name)
+      %Q[ffmpeg -f concat -safe 0 -i #{file_name} -c copy #{base_name}.vob]
+    end
+
+    # File convert command, vob to mp4 for FFmpeg.
+    #   * Change the aspect ratio to 16:9.
+    #   * Delete a closed caption.
+    def str_convert_cmd(file_name)
+      %Q[ffmpeg -i #{file_name}.vob -filter:v "crop=704:474:0:0" -vcodec libx264 -b:v 500k -aspect 16:9 -acodec copy -bsf:v "filter_units=remove_types=6" #{file_name}.mp4]
     end
 
     # Read video information from dvd-ram discs in dvd-vr format.
@@ -39,7 +62,7 @@ module Dvdvrconv
       out, err, status = Open3.capture3(@vrdisc.cmd, @vrdisc.opts_ifo)
       @vrdisc.header = out.scan(/^(.*?)Number/m)
 
-      # Sets the captured item to an instance variable.
+      # Sets the captured information to @vrdisc.
       %w(num title date size).each do |item|
         str = format("%-5s", item) + ":"
         @vrdisc[item] = out.scan(/#{str}\s(.*?)$/)
@@ -93,9 +116,9 @@ module Dvdvrconv
       @vrdisc.output_title = output_title
     end
 
-    # Read VRO file from dvd-ram discs in dvd-vr format, and output vob files.
+    # Read VRO file from dvd-ram disc in dvd-vr format, and output vob files.
     def vro2vob
-      cmd = %Q(#{@vrdisc.cmd} --name=#{Dvdvrconv::BASE_NAME} #{@vrdisc.opts_ifo} #{@vrdisc.opts_vro})
+      cmd = str_dvdvr_cmd
       puts "----- convert file VRO to VOB -----"
       puts "> cmd:\n  #{cmd}"
       system(cmd)
@@ -107,17 +130,20 @@ module Dvdvrconv
     #
     #   base_dst_name = ["name_one", "name_two"]
     #   number_list = []
+    #   => ["name_one", "name_two"]
     #
     # If add a sequence number to the file name. Write "base_dst_name" as an String.
     #
     #   base_dst_name = "output_name_"
     #   number_list = []
+    #   => ["output_name_01", "output_name_02", ...]
     #
     # If specify sequence numbers individually.
     # Write "base_dst_name" as an String and Write "number_list" as an Array.
     #
     #   base_dst_name = "output_name_"
     #   number_list = [12, 13, 14, 15]
+    #   => ["output_name_12", "output_name_13", "output_name_14", "output_name_15"]
     #
     def customize_title(base_dst_name, number_list = [])
       vob_titles = []
@@ -198,7 +224,7 @@ module Dvdvrconv
         File.write(file_name, contents)
         puts "concat list= #{file_name}"
 
-        cmd = %Q[ffmpeg -f concat -safe 0 -i #{file_name} -c copy #{base_name}.vob]
+        cmd = str_concat_cmd(file_name, base_name)
         puts "----- concat vob files -----"
         puts "run cmd:\n  #{cmd}"
         system(cmd)
@@ -212,8 +238,6 @@ module Dvdvrconv
     end
 
     # convert vob to mp4.
-    #   * Change the aspect ratio to 16:9.
-    #   * Delete a closed caption.
     def vob2mp4
       vob_titles = @vrdisc.title.uniq.map { |x| x[0].gsub(/\s/, "_") }
 
@@ -221,7 +245,7 @@ module Dvdvrconv
         if File.exist?("#{file_name}.mp4")
           puts "Skip => file #{file_name}.mp4 is exist."
         else
-          cmd = %Q[ffmpeg -i #{file_name}.vob -filter:v "crop=704:474:0:0" -vcodec libx264 -b:v 500k -aspect 16:9 -acodec copy -bsf:v "filter_units=remove_types=6" #{file_name}.mp4]
+          cmd = str_convert_cmd(file_name)
           puts "----- convert #{file_name}.vob to mp4 file -----"
           puts "run cmd:\n  #{cmd}"
           system(cmd)
