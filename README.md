@@ -4,10 +4,12 @@
 Dvdvrconv extracts the `vob` file from the `vro` file on the dvd-vr format disc.
 Dvdvrconv is also a wrapper for [pixelb/dvd-vr](https://github.com/pixelb/dvd-vr/).
 
-
-
 For Windows users, I attached `dvd-vr.exe` for cygwin environment.
 
+## dependent libraries
+
+*  [pixelb/dvd-vr](https://github.com/pixelb/dvd-vr/)
+*  FFmpeg
 
 ## Installation
 
