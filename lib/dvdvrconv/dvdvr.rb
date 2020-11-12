@@ -132,14 +132,14 @@ module Dvdvrconv
     #   number_list = []
     #   => ["name_one", "name_two"]
     #
-    # If add a sequence number to the file name. Write "base_dst_name" as an String.
+    # If add a sequence number to the file name. Write "base_dst_name" as String.
     #
     #   base_dst_name = "output_name_"
     #   number_list = []
     #   => ["output_name_01", "output_name_02", ...]
     #
     # If specify sequence numbers individually.
-    # Write "base_dst_name" as an String and Write "number_list" as an Array.
+    # Write "base_dst_name" as String and Write "number_list" as an Array.
     #
     #   base_dst_name = "output_name_"
     #   number_list = [12, 13, 14, 15]
