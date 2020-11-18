@@ -1,0 +1,46 @@
+# Path for the VR_MANGR.IFO.
+vr_mangr_ifo: "./test/DVD_RTAV/VR_MANGR.IFO"
+
+# Path for the VR_MOVIE.VRO.
+vr_movie_vro: "./test/DVD_RTAV/VR_MOVIE.VRO"
+
+# Path of the dvd-vr command.
+dvd_vr_cmd: "./win/dvd-vr.exe"
+
+
+# customize the title name of vob files.
+#
+# If specify individual file names. Write "base_dst_name:" as an Array.
+#
+#   use_customize_title: 1
+#   base_dst_name: ["name_one", "name_two"]
+#   number_list: []
+#   => ["name_one", "name_two"]
+#
+# If add a sequence number to the file name. Write "base_dst_name:" as String.
+#
+#   use_customize_title: 2
+#   base_dst_name: "output_name_"
+#   number_list: []
+#   => ["output_name_01", "output_name_02", ...]
+#
+# If specify sequence numbers individually.
+# Write "base_dst_name:" as String and Write "number_list" as an Array.
+#
+#   use_customize_title: 3
+#   base_dst_name: "output_name_"
+#   number_list: [12, 13, 14, 15]
+#   => ["output_name_12", "output_name_13", "output_name_14", "output_name_15"]
+#
+#  
+# If do not want to customize the title name, 
+# Specify `use_customize_title: no`.
+# 
+#   use_customize_title: no
+#   base_dst_name: []
+#   number_list: []
+
+use_customize_title: 3
+base_dst_name: my_title_
+
+number_list: [11, 12, 13]
