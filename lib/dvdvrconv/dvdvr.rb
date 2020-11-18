@@ -16,6 +16,10 @@ module Dvdvrconv
   )
 
   BASE_NAME = "DVD"
+  DEFAULT_CONFIG_FILE = "default_dvdvrconv.yaml"
+
+  # Default DVD drive is "d".
+  # If you want to use a different drive, you need to set up a "default_dvdvrconv.yaml" file.
   WIN_DRV_IFO = "/cygdrive/D/DVD_RTAV/VR_MANGR.IFO"
   WIN_DRV_VRO = "/cygdrive/D/DVD_RTAV/VR_MOVIE.VRO"
   WIN_DRV_CMD = "win/dvd-vr.exe"
@@ -58,7 +62,20 @@ module Dvdvrconv
     end
 
     # Read video information from dvd-ram discs in dvd-vr format.
+    #
+    # required values:
+    #   @vrdisc.cmd, @vrdisc.opts_ifo
+    #
+    # Get values of the video information:
+    #   => @vrdisc.header
+    #   => @vrdisc.num
+    #   => @vrdisc.title
+    #   => @vrdisc.date
+    #   => @vrdisc.size
+    #
     def read_info
+      puts "@vrdisc.cmd= #{@vrdisc.cmd}, @vrdisc.opts_ifo= #{@vrdisc.opts_ifo}"
+
       out, err, status = Open3.capture3(@vrdisc.cmd, @vrdisc.opts_ifo)
       @vrdisc.header = out.scan(/^(.*?)Number/m)
 
@@ -72,6 +89,11 @@ module Dvdvrconv
     end
 
     # View video information from dvd-ram discs in dvd-vr format.
+    #
+    # required values:
+    #   @vrdisc.header, @vrdisc.num, @vrdisc.title,
+    #   @vrdisc.date, @vrdisc.size
+    #
     def view_info
       puts "----- view dvd-vr info -----"
       puts @vrdisc.header
@@ -86,6 +108,14 @@ module Dvdvrconv
 
     # Add sequence number to the duplicate title name.
     # Replace white space in the title with underscore.
+    #
+    # required value:
+    #   @vrdisc.title
+    #
+    # Output values:
+    #   => @vrdisc.duplicate_name
+    #   => @vrdisc.output_title
+    #
     def adjust_title
       output_title = []
       duplicate_names = []
@@ -122,6 +152,7 @@ module Dvdvrconv
       puts "----- convert file VRO to VOB -----"
       puts "> cmd:\n  #{cmd}"
       system(cmd)
+      puts ""
     end
 
     # customize the title of vob files.
@@ -144,6 +175,13 @@ module Dvdvrconv
     #   base_dst_name = "output_name_"
     #   number_list = [12, 13, 14, 15]
     #   => ["output_name_12", "output_name_13", "output_name_14", "output_name_15"]
+    #
+    # required Argument, value:
+    #   base_dst_name, number_list,
+    #   @vrdisc.title
+    #
+    # Output values:
+    #   => @vrdisc.vob_titles
     #
     def customize_title(base_dst_name, number_list = [])
       vob_titles = []
@@ -175,6 +213,9 @@ module Dvdvrconv
     # @param [String] file_titles is Array. Includes pair of source and destination filename.
     #   *  [[src, dst], [src, dst], [src, dst], ....]
     #
+    # required value:
+    #   @vrdisc.vob_titles
+    #
     def rename_vob
       puts "----- output vob file -----"
 
@@ -191,6 +232,10 @@ module Dvdvrconv
     end
 
     # Make a list of file names to concatenate.
+    #
+    # required values:
+    #   @vrdisc.duplicate_name, @vrdisc.output_title
+    #
     def make_concat_list
       concat_list = []
 
@@ -208,6 +253,9 @@ module Dvdvrconv
 
     # Concatenate Split Titles.
     # This method uses FFmpeg's media file concatenation feature.
+    #
+    # required Argument:
+    #   concat_list
     #
     # concat_list is Array. Includes file_name, contents, base_name.
     #
@@ -238,10 +286,14 @@ module Dvdvrconv
     end
 
     # convert vob to mp4.
+    #
+    # required Values:
+    #   @vrdisc.vob_titles
+    #
     def vob2mp4
-      vob_titles = @vrdisc.title.uniq.map { |x| x[0].gsub(/\s/, "_") }
+      @vrdisc.vob_titles.each do |vob_title|
+        file_name = vob_title[1].gsub(/.vob/, "")
 
-      vob_titles.each do |file_name|
         if File.exist?("#{file_name}.mp4")
           puts "Skip => file #{file_name}.mp4 is exist."
         else
