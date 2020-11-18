@@ -74,8 +74,6 @@ module Dvdvrconv
     #   => @vrdisc.size
     #
     def read_info
-      puts "@vrdisc.cmd= #{@vrdisc.cmd}, @vrdisc.opts_ifo= #{@vrdisc.opts_ifo}"
-
       out, err, status = Open3.capture3(@vrdisc.cmd, @vrdisc.opts_ifo)
       @vrdisc.header = out.scan(/^(.*?)Number/m)
 

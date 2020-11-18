@@ -28,15 +28,23 @@ module Dvdvrconv
       # dvd.vrdisc.opts_vro = "test/DVD_RTAV/VR_MOVIE.VRO"
 
       if options[:opt][:config_file]
-        puts "Use config file => #{options[:opt][:config_file]}"
+        puts "Use config file\n  => #{options[:opt][:config_file]}"
         opt_config_file = options[:opt][:config_file]
         load_config(opt_config_file) if File.exist?(opt_config_file)
+        dvd.vrdisc.opts_ifo = @options[:vr_mangr_ifo] if @options[:vr_mangr_ifo]
+        dvd.vrdisc.opts_vro = @options[:vr_movie_vro] if @options[:vr_movie_vro]
+        dvd.vrdisc.cmd = @options[:dvd_vr_cmd] if @options[:dvd_vr_cmd]
       end
+
+      # View the path of each files
+      puts "== Use these paths =="
+      puts "  => VR_MANGR.IFO: #{dvd.vrdisc.opts_ifo}"
+      puts "  => VR_MOVIE.VRO #{dvd.vrdisc.opts_vro}"
+      puts "  => dvd-vr.exe: #{dvd.vrdisc.cmd}"
 
       dvd.read_info
 
       if options[:opt][:info]
-        puts "== opt options =="
         dvd.view_info
         exit
       end
