@@ -1,4 +1,4 @@
-# Dvdvrconv
+# Dvdvrconv [![Gem Version](https://badge.fury.io/rb/dvdvrconv.svg)](https://badge.fury.io/rb/dvdvrconv)
 
   
 Dvdvrconv extracts the `vob` file from the `vro` file on the dvd-vr format disc.
