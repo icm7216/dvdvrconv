@@ -153,6 +153,26 @@ module Dvdvrconv
       puts ""
     end
 
+    # Change the file name to the title name
+    #
+    # required value:
+    #   @vrdisc.title
+    #
+    # Output values:
+    #   => @vrdisc.vob_titles
+    #
+    def change_to_title_name
+      vob_titles = []
+
+      @vrdisc.title.size.times do |x|
+        src = format("%s#%03d", Dvdvrconv::BASE_NAME, x + 1) + ".vob"
+        dst = @vrdisc.output_title[x] + ".vob"
+        vob_titles << [src, dst]
+      end
+
+      @vrdisc.vob_titles = vob_titles
+    end
+
     # customize the title of vob files.
     #
     # If specify individual file names. Write "base_dst_name" as an Array.
@@ -185,8 +205,8 @@ module Dvdvrconv
       vob_titles = []
 
       base_dst_name.size.times do |x|
-        break if x > @vrdisc.title.size - 1
-        src = format("%s#%03d", Dvdvrconv::BASE_NAME, x + 1) + ".vob"
+        break if x > @vrdisc.title.uniq.size - 1
+        src = @vrdisc.title.uniq[x][0].gsub(/\s/, "_") + ".vob"
 
         case base_dst_name
         when Array
@@ -289,9 +309,13 @@ module Dvdvrconv
     #   @vrdisc.vob_titles
     #
     def vob2mp4
-      @vrdisc.vob_titles.each do |vob_title|
-        file_name = vob_title[1].gsub(/.vob/, "")
+      files = []
 
+      @vrdisc.vob_titles.each do |vob_title|
+        files << vob_title[1].gsub(/.vob/, "")
+      end
+
+      files.each do |file_name|
         if File.exist?("#{file_name}.mp4")
           puts "Skip => file #{file_name}.mp4 is exist."
         else
@@ -300,6 +324,12 @@ module Dvdvrconv
           puts "run cmd:\n  #{cmd}"
           system(cmd)
         end
+      end
+    end
+
+    def debug_view_vrdisc
+      @vrdisc.members.each do |member|
+        puts "#{member} => #{@vrdisc[member]}"
       end
     end
   end

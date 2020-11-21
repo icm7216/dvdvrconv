@@ -53,6 +53,14 @@ module Dvdvrconv
       dvd.adjust_title
       dvd.vro2vob
 
+      # Change the file name to the title name
+      dvd.change_to_title_name
+      dvd.rename_vob
+
+      # Concatenate Split titles
+      concat_list = dvd.make_concat_list
+      dvd.concat_titles(concat_list)
+
       # customize title of vob files
       case @options[:use_customize_title]
       when 1
@@ -95,16 +103,12 @@ module Dvdvrconv
         end
       else
         puts "No customize file names"
-        base_dst_name = dvd.vrdisc.output_title
+        base_dst_name = dvd.vrdisc.title.uniq.map { |file| file[0].gsub(/\s/, "_") }
         number_list = []
       end
 
       dvd.customize_title(base_dst_name, number_list)
       dvd.rename_vob
-
-      # Concatenate Split titles
-      concat_list = dvd.make_concat_list
-      dvd.concat_titles(concat_list)
 
       # convert vob to mp4
       dvd.vob2mp4
