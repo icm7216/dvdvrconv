@@ -118,11 +118,16 @@ module Dvdvrconv
     def load_config(file)
       config = YAML.load(File.read(file))
 
-      %w(vr_mangr_ifo vr_movie_vro dvd_vr_cmd).each do |file|
-        if File.exist?(config[file])
-          @options[file.to_sym] = config[file]
+      %w(vr_mangr_ifo vr_movie_vro dvd_vr_cmd).each do |key|
+        unless config.key?(key)
+          puts "[ #{key} ] does not exist in #{file} file."
+          exit
+        end
+
+        if File.exist?(config[key])
+          @options[key.to_sym] = config[key]
         else
-          puts "File read error. No such file: #{config[file]}"
+          puts "File read error. No such file: #{config[key]}"
         end
       end
 
