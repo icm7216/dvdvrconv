@@ -31,9 +31,14 @@ $ gem install dvdvrconv
 
 ## Usage
 
-TODO:
-*  Write usage instructions here
-*  Add command options
+```
+>dvdvrconv -h
+Usage: dvdvrconv [options]
+    -v, --version                    Show version
+    -i, --info                       Show file information
+        --config=FILE                Use YAML format FILE.
+```
+
 
 ## Development
 
