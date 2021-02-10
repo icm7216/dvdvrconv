@@ -55,8 +55,8 @@ module Dvdvrconv
     end
 
     # File convert command, vob to mp4 for FFmpeg.
-    #   * Change the aspect ratio to 16:9.
-    #   * Delete a closed caption.
+    # * Change the aspect ratio to 16:9.
+    # * Delete a closed caption.
     def str_convert_cmd(file_name)
       %Q[ffmpeg -i #{file_name}.vob -filter:v "crop=704:474:0:0" -vcodec libx264 -b:v 500k -aspect 16:9 -acodec copy -bsf:v "filter_units=remove_types=6" #{file_name}.mp4]
     end
@@ -279,9 +279,9 @@ module Dvdvrconv
     #
     #   concat_list = [[file_name, contents, base_name], [file_name, contents, base_name]. .... ]
     #
-    #   @param [String] file_name concat list name.
-    #   @param [String] contents concatenate file names.
-    #   @param [String] base_name output vob name.
+    # @param [String] file_name concat list name.
+    # @param [String] contents concatenate file names.
+    # @param [String] base_name output vob name.
     #
     def concat_titles(concat_list)
       puts "----- Concatenate Split Titles -----"
