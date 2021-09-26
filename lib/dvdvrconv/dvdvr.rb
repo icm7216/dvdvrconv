@@ -13,6 +13,9 @@ module Dvdvrconv
     :output_title,    # @param [Array<String>]
     :duplicate_name,  # @param [Array<String>]
     :vob_titles,      # @param [Array<String>]
+    :default_opts_ifo,# @param [String]
+    :default_opts_vro,# @param [String]
+    :default_cmd,     # @param [String]
   )
 
   BASE_NAME = "DVD"
@@ -42,6 +45,10 @@ module Dvdvrconv
         @vrdisc.opts_vro = Dvdvrconv::DRV_VRO
         @vrdisc.cmd = Dvdvrconv::DRV_CMD
       end
+
+      @vrdisc.default_opts_ifo = @vrdisc.opts_ifo
+      @vrdisc.default_opts_vro = @vrdisc.opts_vro
+      @vrdisc.default_cmd = @vrdisc.cmd
     end
 
     # Read VRO file from dvd-ram disc in dvd-vr format, and output vob files.
@@ -75,6 +82,7 @@ module Dvdvrconv
     #
     def read_info
       out, err, status = Open3.capture3(@vrdisc.cmd, @vrdisc.opts_ifo)
+      puts "File read error => #{err}" unless status.success?
       @vrdisc.header = out.scan(/^(.*?)Number/m)
 
       # Sets the captured information to @vrdisc.

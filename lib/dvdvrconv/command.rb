@@ -20,12 +20,23 @@ module Dvdvrconv
       dvd = Dvdvrconv::Dvdvr.new
 
       # Set the path specified in the yaml file.
-      dvd.vrdisc.opts_ifo = @options[:vr_mangr_ifo] if @options[:vr_mangr_ifo]
-      dvd.vrdisc.opts_vro = @options[:vr_movie_vro] if @options[:vr_movie_vro]
-      dvd.vrdisc.cmd = @options[:dvd_vr_cmd] if @options[:dvd_vr_cmd]
+      if @options[:vr_mangr_ifo]
+        dvd.vrdisc.opts_ifo = @options[:vr_mangr_ifo]
+      else
+        dvd.vrdisc.opts_ifo = dvd.vrdisc.default_opts_ifo
+      end
 
-      # dvd.vrdisc.opts_ifo = "test/DVD_RTAV/VR_MANGR.IFO"
-      # dvd.vrdisc.opts_vro = "test/DVD_RTAV/VR_MOVIE.VRO"
+      if @options[:vr_movie_vro]
+        dvd.vrdisc.opts_vro = @options[:vr_movie_vro]
+      else
+        dvd.vrdisc.opts_vro = dvd.vrdisc.default_opts_vro
+      end
+
+      if @options[:dvd_vr_cmd]
+        dvd.vrdisc.cmd = @options[:dvd_vr_cmd]
+      else
+        dvd.vrdisc.cmd = dvd.vrdisc.default_cmd
+      end
 
       if options[:opt][:config_file]
         puts "Use config file\n  => #{options[:opt][:config_file]}"
@@ -119,21 +130,31 @@ module Dvdvrconv
       config = YAML.load(File.read(file))
 
       %w(vr_mangr_ifo vr_movie_vro dvd_vr_cmd).each do |key|
+        @options[key.to_sym] = nil
+
         unless config.key?(key)
           puts "[ #{key} ] does not exist in #{file} file."
-          exit
+        else
+          if File.exist?(config[key])
+            @options[key.to_sym] = config[key]
+          else
+            puts "File read error. No such file: #{config[key]}"
+          end
         end
 
-        if File.exist?(config[key])
-          @options[key.to_sym] = config[key]
-        else
-          puts "File read error. No such file: #{config[key]}"
-        end
       end
 
       @options[:use_customize_title] = config["use_customize_title"] || "no"
       @options[:base_dst_name] = config["base_dst_name"] || []
       @options[:number_list] = config["number_list"] || []
+    end
+
+    def dvdpath
+      {
+        :vr_mangr_ifo => @options[:vr_mangr_ifo],
+        :vr_movie_vro => @options[:vr_movie_vro],
+        :dvd_vr_cmd => @options[:dvd_vr_cmd]
+      } 
     end
   end
 end
