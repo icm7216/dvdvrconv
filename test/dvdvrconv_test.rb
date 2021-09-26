@@ -114,4 +114,40 @@ class DvdvrconvTest < Test::Unit::TestCase
       assert_equal(expected, actual)
     end
   end
+
+  sub_test_case "load YAML file" do
+    test 'load from test dir' do
+      config_file = {
+        "vr_mangr_ifo" => "./test/DVD_RTAV/VR_MANGR.IFO",
+        "vr_movie_vro" => "./test/DVD_RTAV/VR_MOVIE.VRO",
+        "dvd_vr_cmd" => "./win/dvd-vr.exe"
+      }
+      stub(YAML).load {config_file}
+      @dvdcmd = Dvdvrconv::Command.new(["-i"])
+      @dvdcmd.load_config("./sample_default_dvdvrconv.yaml")
+
+      expected = {
+        :vr_mangr_ifo => "./test/DVD_RTAV/VR_MANGR.IFO",
+        :vr_movie_vro => "./test/DVD_RTAV/VR_MOVIE.VRO",
+        :dvd_vr_cmd => "./win/dvd-vr.exe",
+      }
+      assert_equal expected, @dvdcmd.dvdpath
+    end
+
+    test 'undefined load directory' do
+      config_file = {
+        "dvd_vr_cmd" => "./win/dvd-vr.exe"
+      }
+      stub(YAML).load {config_file}
+      @dvdcmd = Dvdvrconv::Command.new(["-i"])
+      @dvdcmd.load_config("./sample_default_dvdvrconv.yaml")
+
+      expected = {
+        :vr_mangr_ifo => nil,
+        :vr_movie_vro => nil,
+        :dvd_vr_cmd => "./win/dvd-vr.exe",
+      }
+      assert_equal expected, @dvdcmd.dvdpath
+    end
+  end
 end
