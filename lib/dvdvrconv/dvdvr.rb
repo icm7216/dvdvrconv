@@ -25,7 +25,7 @@ module Dvdvrconv
   # If you want to use a different drive, you need to set up a "default_dvdvrconv.yaml" file.
   WIN_DRV_IFO = "/cygdrive/D/DVD_RTAV/VR_MANGR.IFO"
   WIN_DRV_VRO = "/cygdrive/D/DVD_RTAV/VR_MOVIE.VRO"
-  WIN_DRV_CMD = "win/dvd-vr.exe"
+  WIN_DRV_CMD = File.expand_path("../../win/dvd-vr.exe", __dir__)
   DRV_IFO = "/mnt/d/DVD_RTAV/VR_MANGR.IFO"
   DRV_VRO = "/mnt/d/DVD_RTAV/VR_MOVIE.VRO"
   DRV_CMD = "dvd-vr"
