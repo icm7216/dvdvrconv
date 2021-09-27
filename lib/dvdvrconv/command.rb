@@ -55,11 +55,9 @@ module Dvdvrconv
 
       dvd.read_info
 
-      if options[:opt][:info]
-        dvd.view_info
-        exit
-      end
-
+      dvd.view_info if options[:opt][:info] || options[:opt].empty?
+      exit unless options[:opt][:exec]
+      
       # Extract vob files
       dvd.adjust_title
       dvd.vro2vob
@@ -127,7 +125,7 @@ module Dvdvrconv
 
     # load yaml file and store in @options.
     def load_config(file)
-      config = YAML.load(File.read(file))
+      config = YAML.load(File.read(file)) || {}
 
       %w(vr_mangr_ifo vr_movie_vro dvd_vr_cmd).each do |key|
         @options[key.to_sym] = nil

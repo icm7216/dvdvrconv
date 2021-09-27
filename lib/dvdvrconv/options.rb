@@ -15,8 +15,12 @@ module Dvdvrconv
           options[:info] = v
         end
 
-        o.on("--config=FILE", String, "Use YAML format FILE.") do |file|
+        o.on("-c", "--config=FILE", String, "Use YAML format FILE.") do |file|
           options[:config_file] = file
+        end
+
+        o.on("-e", "--exec", "Execute the vob file to mp4 conversion.") do |v|
+          options[:exec] = v
         end
       end
 
@@ -26,7 +30,7 @@ module Dvdvrconv
         abort e.message
       rescue OptionParser::MissingArgument => e
         case e.args
-        when ["--config"]
+        when ["-c"], ["--config"]
           # load_config(Dvdvrconv::DEFAULT_CONFIG_FILE)
           puts "The config file has not been specified.\nUse the default configuration file. (=> #{Dvdvrconv::DEFAULT_CONFIG_FILE})"
           options[:config_file] = Dvdvrconv::DEFAULT_CONFIG_FILE
