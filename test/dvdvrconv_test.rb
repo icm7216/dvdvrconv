@@ -124,7 +124,7 @@ class DvdvrconvTest < Test::Unit::TestCase
       }
       stub(YAML).load {config_file}
       @dvdcmd = Dvdvrconv::Command.new(["-i"])
-      @dvdcmd.load_config("./sample_default_dvdvrconv.yaml")
+      @dvdcmd.load_config("./sample_default_dvdvrconv.yml")
 
       expected = {
         :vr_mangr_ifo => "./test/DVD_RTAV/VR_MANGR.IFO",
@@ -140,7 +140,7 @@ class DvdvrconvTest < Test::Unit::TestCase
       }
       stub(YAML).load {config_file}
       @dvdcmd = Dvdvrconv::Command.new(["-i"])
-      @dvdcmd.load_config("./sample_default_dvdvrconv.yaml")
+      @dvdcmd.load_config("./sample_default_dvdvrconv.yml")
 
       expected = {
         :vr_mangr_ifo => nil,

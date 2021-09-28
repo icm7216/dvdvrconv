@@ -19,10 +19,10 @@ module Dvdvrconv
   )
 
   BASE_NAME = "DVD"
-  DEFAULT_CONFIG_FILE = "default_dvdvrconv.yaml"
+  DEFAULT_CONFIG_FILE = "default_dvdvrconv.yml"
 
   # Default DVD drive is "d".
-  # If you want to use a different drive, you need to set up a "default_dvdvrconv.yaml" file.
+  # If you want to use a different drive, you need to set up a "default_dvdvrconv.yml" file.
   WIN_DRV_IFO = "/cygdrive/D/DVD_RTAV/VR_MANGR.IFO"
   WIN_DRV_VRO = "/cygdrive/D/DVD_RTAV/VR_MOVIE.VRO"
   WIN_DRV_CMD = File.expand_path("../../win/dvd-vr.exe", __dir__)
