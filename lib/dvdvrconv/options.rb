@@ -19,7 +19,7 @@ module Dvdvrconv
           options[:config_file] = file
         end
 
-        o.on("-e", "--exec", "Execute the vob file to mp4 conversion.") do |v|
+        o.on("-e", "--exec", "Execute the VRO file to mp4 conversion.") do |v|
           options[:exec] = v
         end
       end
