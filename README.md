@@ -116,7 +116,7 @@ vr_movie_vro: "/mnt/d/DVD_RTAV/VR_MOVIE.VRO"
 On Windows, you can use the included dvd-vr command.
 
 On WSL(ubuntu), you can use the dvd-vr command that you have compiled yourself.
-
+*  See the section below, "install dependent libraries for WSL(ubuntu)"
 
 #### use_customize_title, base_dst_name, number_list
 
@@ -160,7 +160,8 @@ number_list: []
 
 ## Install dependent libraries for WSL(ubuntu)
 
-dvd-vr
+### dvd-vr
+
 *  [pixelb/dvd-vr](https://github.com/pixelb/dvd-vr/)
 
 ```
@@ -199,18 +200,67 @@ extracted to the current directory or to stdout.
 ```
 
 
-ffmpeg
+### FFmpeg
+
 ```
 sudo apt install ffmpeg
 ```
 
-
 ## Install dependent libraries for Windows
 
+### dvd-vr
+
+Compile dvd-vr command in Cygwin environment.
+
+Download Cygwin for 64-bit version. => [setup-x86_64.exe](https://cygwin.com/setup-x86_64.exe)
 
 
+Install Cygwin for 64-bit version. At the Windows command prompt.
+```
+setup-x86_64.exe ^
+   --root c:\cygwin64 ^
+   --local-package-dir c:\cygwin64\packages ^
+   --site https://ftp.iij.ad.jp/pub/cygwin/ ^
+   --quiet-mode ^
+   --packages libiconv,libiconv-devel,gcc-core,gcc-g++,git,make
+```
 
-ffmpeg
+Compile dvd-vr. At the Cygwin terminal.
+```
+$ git clone https://github.com/pixelb/dvd-vr.git
+Cloning into 'dvd-vr'...
+remote: Enumerating objects: 140, done.
+remote: Total 140 (delta 0), reused 0 (delta 0), pack-reused 140
+Receiving objects: 100% (140/140), 260.97 KiB | 954.00 KiB/s, done.
+Resolving deltas: 100% (37/37), done.
+
+$ cd dvd-vr/
+
+$ make install
+cc -std=gnu99 -Wall -Wextra -Wpadded -DVERSION='"0.9.8b"' -O3 -DNDEBUG -DHAVE_ICONV -DICONV_CONST="const"  -c -o dvd-vr.o dvd-vr.c
+dvd-vr.c: In function ‘text_convert’:
+dvd-vr.c:414:24: warning: passing argument 2 of ‘libiconv’ from incompatible pointer type [-Wincompatible-pointer-types]
+  414 |         if (iconv (cd, (ICONV_CONST char**)&src, &srclen, &dst, &dstlen) != (size_t)-1) {
+      |                        ^~~~~~~~~~~~~~~~~~~~~~~~
+      |                        |
+      |                        const char **
+In file included from dvd-vr.c:124:
+/usr/include/iconv.h:82:43: note: expected ‘char **’ but argument is of type ‘const char **’
+   82 | extern size_t iconv (iconv_t cd,  char* * inbuf, size_t *inbytesleft, char* * outbuf, size_t *outbytesleft);
+      |                                   ~~~~~~~~^~~~~
+cc  dvd-vr.o -liconv -Wl,-S -o dvd-vr.exe
+cp man/dvd-vr.man man/dvd-vr.1
+cp -p dvd-vr.exe /usr/local/bin
+gzip -c man/dvd-vr.1 > /usr/local/share/man/man1/dvd-vr.1.gz
+```
+
+After compile success, you will get the following files.
+*  dvd-vr.exe     (c:\cygwin64\home\user_name\dvd-vr)
+*  cygwin1.dll    (c:\cygwin64\bin)
+*  cygiconv-2.dll (c:\cygwin64\bin)
+
+
+### FFmpeg
 
 *  [FFmpeg](https://www.ffmpeg.org/download.html)
 From the Windows EXE Files link above, select the following website.
