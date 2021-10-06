@@ -35,6 +35,8 @@ module Dvdvrconv
           puts "The config file has not been specified.\nUse the default configuration file. (=> #{Dvdvrconv::DEFAULT_CONFIG_FILE})"
           options[:config_file] = Dvdvrconv::DEFAULT_CONFIG_FILE
         end
+      rescue OptionParser::ParseError => e
+        abort e.message
       end
 
       { opt: options }
