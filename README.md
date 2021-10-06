@@ -1,8 +1,8 @@
-# Dvdvrconv [![Gem Version](https://badge.fury.io/rb/dvdvrconv.svg)](https://badge.fury.io/rb/dvdvrconv)
+# dvdvrconv [![Gem Version](https://badge.fury.io/rb/dvdvrconv.svg)](https://badge.fury.io/rb/dvdvrconv)
 
   
-Dvdvrconv extracts the `vob` file from the `vro` file on the dvd-vr format disc.
-Dvdvrconv is also a wrapper for [pixelb/dvd-vr](https://github.com/pixelb/dvd-vr/).
+dvdvrconv extracts the `vob` files from the `vro` files on the DVD-VR format disc and converts them to `mp4` files.
+dvdvrconv is also a wrapper for [pixelb/dvd-vr](https://github.com/pixelb/dvd-vr/).
 
 For Windows users, I attached `dvd-vr.exe` for cygwin environment.
 
