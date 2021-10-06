@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.email = ["icm7216d@gmail.com"]
 
   spec.summary = %q{DVD-VR utility}
-  spec.description = %q{This tool converts "vor" file on DVD-VR format disc to "vob" files.}
+  spec.description = %q{This tool converts "vro" file on DVD-VR format disc to "mp4" files.}
   spec.homepage = "https://github.com/icm7216/dvdvrconv"
   spec.license = "MIT"
   spec.required_ruby_version = Gem::Requirement.new(">= 2.4.0")
