@@ -10,6 +10,7 @@ module Dvdvrconv
 
       config_file = Dvdvrconv::DEFAULT_CONFIG_FILE
       if File.exist?(config_file)
+        puts "Read the default config file. => #{config_file}"
         load_config(config_file)
       end
     end
@@ -52,7 +53,11 @@ module Dvdvrconv
       puts "  => VR_MANGR.IFO: #{dvd.vrdisc.opts_ifo}"
       puts "  => VR_MOVIE.VRO #{dvd.vrdisc.opts_vro}"
       puts "  => dvd-vr.exe: #{dvd.vrdisc.cmd}"
-
+      puts "== Customize settings =="
+      puts "  => use_customize_title: #{@options[:use_customize_title]}"
+      puts "  => base_dst_name: #{@options[:base_dst_name]}"
+      puts "  => number_list: #{@options[:number_list]}"
+      
       dvd.read_info
 
       dvd.view_info if options[:opt][:info] || options[:opt].empty?
