@@ -75,7 +75,6 @@ Execute the VRO file to mp4 conversion.
 Command options
 ```
 >dvdvrconv -h
-[ dvd_vr_cmd ] does not exist in default_dvdvrconv.yml file.
 Usage: dvdvrconv [options]
     -v, --version                    Show version
     -i, --info                       Show file information
