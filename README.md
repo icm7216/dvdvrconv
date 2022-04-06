@@ -6,12 +6,12 @@ dvdvrconv is also a wrapper for [pixelb/dvd-vr](https://github.com/pixelb/dvd-vr
 
 For Windows users, I attached `dvd-vr.exe` for cygwin environment.
 
-## dependent libraries
+# dependent libraries
 
 *  [dvd-vr](https://github.com/pixelb/dvd-vr/)
 *  [FFmpeg](https://www.ffmpeg.org/)
 
-## Installation
+# Installation
 
 Add this line to your application's Gemfile:
 
@@ -29,7 +29,7 @@ $ gem install dvdvrconv
 ```
 
 
-## Usage
+# Usage
 
 View video information from dvd-ram disc in dvd-vr format.
 
@@ -82,7 +82,7 @@ Usage: dvdvrconv [options]
     -e, --exec                       Execute the VRO file to mp4 conversion.
 ```
 
-### Configure dvdvrconv
+# Configure dvdvrconv
 
 dvdvrconv reads `default_dvdvrconv.yml` in the current working directory as dvdvrconv's configuration file. It can contain the following settings:
 
@@ -93,7 +93,7 @@ dvdvrconv reads `default_dvdvrconv.yml` in the current working directory as dvdv
 *  base_dst_name
 *  number_list
 
-#### vr_mangr_ifo, vr_movie_vro
+## vr_mangr_ifo, vr_movie_vro
 
 `vr_mangr_ifo` and `vr_movie_vro` specify the path to the dvd-ram disc.
 Drive D is assumed, if different you need to write its path.
@@ -110,14 +110,14 @@ vr_mangr_ifo: "/mnt/d/DVD_RTAV/VR_MANGR.IFO"
 vr_movie_vro: "/mnt/d/DVD_RTAV/VR_MOVIE.VRO"
 ```
 
-#### dvd_vr_cmd
+## dvd_vr_cmd
 
 On Windows, you can use the included dvd-vr command.
 
 On WSL(ubuntu), you can use the dvd-vr command that you have compiled yourself.
 *  See the section below, "install dependent libraries for WSL(ubuntu)"
 
-#### use_customize_title, base_dst_name, number_list
+## use_customize_title, base_dst_name, number_list
 
 customize the title name of vob files.
 
@@ -156,10 +156,31 @@ base_dst_name: []
 number_list: []
 ```
 
+## concat mode
 
-## Install dependent libraries for WSL(ubuntu)
+Allow users to choose to concatenate or not concatenate titles with the same name.
 
-### dvd-vr
+When editing a title on a dvd-vr recorder (e.g., partial cut editing.), the title is split into multiple files.
+
+Enabling "concat_mode" allows you to concatenate multiple split files into one.
+
+If this option is not specified, the default setting is to concatenate titles of the same name.
+```
+concat_mode: true
+```
+
+On the other hand, you may not want to concatenate multiple titles with the same name on a dvd-vr disc.
+In this case, "concat_mode" can be disabled.
+```
+concat_mode: false
+```
+
+
+
+
+# Install dependent libraries for WSL(ubuntu)
+
+## dvd-vr
 
 *  [pixelb/dvd-vr](https://github.com/pixelb/dvd-vr/)
 
@@ -199,15 +220,15 @@ extracted to the current directory or to stdout.
 ```
 
 
-### FFmpeg
+## FFmpeg
 
 ```
 sudo apt install ffmpeg
 ```
 
-## Install dependent libraries for Windows
+# Install dependent libraries for Windows
 
-### dvd-vr
+## dvd-vr
 
 Compile dvd-vr command in Cygwin environment.
 
@@ -259,7 +280,7 @@ After compile success, you will get the following files.
 *  cygiconv-2.dll (c:\cygwin64\bin)
 
 
-### FFmpeg
+## FFmpeg
 
 *  [FFmpeg](https://www.ffmpeg.org/download.html)
 From the Windows EXE Files link above, select the following website.
@@ -269,7 +290,7 @@ As an example, download Auto-Build 2021-09-28 12:22.
 *  [ffmpeg-N-103899-g855014ff83-win64-gpl.zip 100MB](https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2021-09-28-12-22/ffmpeg-N-103899-g855014ff83-win64-gpl.zip)
 
 
-## Development
+# Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
@@ -277,7 +298,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 
 
-## License
+# License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
 

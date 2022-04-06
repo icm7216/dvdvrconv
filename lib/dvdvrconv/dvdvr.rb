@@ -16,10 +16,12 @@ module Dvdvrconv
     :default_opts_ifo,# @param [String]
     :default_opts_vro,# @param [String]
     :default_cmd,     # @param [String]
+    :concat_mode,     # @param [Boolean]
   )
 
   BASE_NAME = "DVD"
   DEFAULT_CONFIG_FILE = "default_dvdvrconv.yml"
+  DEFAULT_CONCAT_MODE = true
 
   # Default DVD drive is "d".
   # If you want to use a different drive, you need to set up a "default_dvdvrconv.yml" file.
@@ -49,6 +51,7 @@ module Dvdvrconv
       @vrdisc.default_opts_ifo = @vrdisc.opts_ifo
       @vrdisc.default_opts_vro = @vrdisc.opts_vro
       @vrdisc.default_cmd = @vrdisc.cmd
+      @vrdisc.concat_mode = Dvdvrconv::DEFAULT_CONCAT_MODE
     end
 
     # Read VRO file from dvd-ram disc in dvd-vr format, and output vob files.
@@ -212,18 +215,28 @@ module Dvdvrconv
     def customize_title(base_dst_name, number_list = [])
       vob_titles = []
 
-      base_dst_name.size.times do |x|
-        break if x > @vrdisc.title.uniq.size - 1
-        src = @vrdisc.title.uniq[x][0].gsub(/\s/, "_") + ".vob"
+      if @vrdisc.concat_mode == true
+        titels = @vrdisc.title.uniq.flatten
+      else
+        titels = @vrdisc.output_title
+      end
+
+      titels.each_with_index do |title, idx|      
+        src = title.gsub(/\s/, "_") + ".vob"
 
         case base_dst_name
         when Array
-          dst_name = base_dst_name[x]
+          dst_name = base_dst_name[idx]
         when String
           if number_list.size.zero?
-            dst_name = base_dst_name + format("_%02d", x + 1)
+            dst_name = base_dst_name + format("_%02d", idx + 1)
           else
-            dst_name = base_dst_name + format("_%02d", number_list[x])
+            case number_list[idx]
+            when Numeric
+              dst_name = base_dst_name + format("_%02d", number_list[idx])
+            when String
+              dst_name = base_dst_name + format("_%s", number_list[idx])
+            end
           end
         end
 
@@ -309,6 +322,14 @@ module Dvdvrconv
           p $!
         end
       end
+    end
+
+    def vrdisc_status
+      puts "\n< < < < < @vrdisc status > > > > >"
+      %w(num title output_title duplicate_name vob_titles concat_mode).each do |item|
+        puts "#{item}=> #{@vrdisc[item]}"
+      end
+      puts "< < < < < @vrdisc status > > > > >\n"
     end
 
     # convert vob to mp4.

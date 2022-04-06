@@ -53,17 +53,20 @@ class DvdvrconvTest < Test::Unit::TestCase
     end
   end
 
-  sub_test_case "customize title name" do
+  sub_test_case "customize title name with concat" do
     setup do
       @dvd = Dvdvrconv::Dvdvr.new
       @dvd.vrdisc.opts_ifo = "test/DVD_RTAV//VR_MANGR.IFO"
-      @dvd.read_info
+      @dvd.vrdisc.num = [["1"], ["2"], ["3"], ["4"], ["5"]]
+      @dvd.vrdisc.title = [["bar"], ["TEST"], ["TEST"], ["TEST"], ["foo"]]
+      @dvd.vrdisc.concat_mode = true
+      @dvd.adjust_title
     end
 
     data(
       "Specify individual file names." => [
-        ["name_one.vob", "name_two.vob", "name_three.vob"],
-        { base_dst_name: ["name_one", "name_two", "name_three"],
+        ["bar.vob", "name_test.vob", "foo.vob"],
+        { base_dst_name: ["bar", "name_test", "foo"],
           number_list: [] },
       ],
       "Add sequence number." => [
@@ -72,13 +75,79 @@ class DvdvrconvTest < Test::Unit::TestCase
           number_list: [] },
       ],
       "Specify sequence numbers individually." => [
-        ["name_11.vob", "name_12.vob", "name_13.vob"],
+        ["name_10.vob", "name_15.vob", "name_20.vob"],
         { base_dst_name: "name",
-          number_list: [11, 12, 13] },
+          number_list: [10, 15, 20] },
       ],
     )
 
-    def test_customize_title(data)
+    def test_customize_title_with_concatenate(data)
+      expected, target = data
+      base_dst_name = target[:base_dst_name]
+      number_list = target[:number_list]
+      titles = @dvd.customize_title(base_dst_name, number_list)
+      actual = titles.transpose[1]
+      assert_equal(expected, actual)
+    end
+  end
+
+  sub_test_case "customize title name no concat" do
+    setup do
+      @dvd = Dvdvrconv::Dvdvr.new
+      @dvd.vrdisc.opts_ifo = "test/DVD_RTAV//VR_MANGR.IFO"
+      @dvd.vrdisc.num = [["1"], ["2"], ["3"], ["4"], ["5"]]
+      @dvd.vrdisc.title = [["bar"], ["TEST"], ["TEST"], ["TEST"], ["foo"]]
+      @dvd.vrdisc.concat_mode = false
+      @dvd.adjust_title
+    end
+
+    data(
+      "Specify individual file names." => [
+        ["bar.vob", "name_one.vob", "name_two.vob", "name_three.vob", "foo.vob"],
+        { base_dst_name: ["bar", "name_one", "name_two", "name_three", "foo"],
+          number_list: [] },
+      ],
+      "Add sequence number." => [
+        ["name_01.vob", "name_02.vob", "name_03.vob", "name_04.vob", "name_05.vob"],
+        { base_dst_name: "name",
+          number_list: [] },
+      ],
+      "Specify sequence numbers individually." => [
+        ["name_10.vob", "name_15.vob", "name_20.vob", "name_25.vob", "name_30.vob"],
+        { base_dst_name: "name",
+          number_list: [10, 15, 20, 25, 30] },
+      ],
+    )
+
+    def test_customize_title_no_concatenate(data)
+      expected, target = data
+      base_dst_name = target[:base_dst_name]
+      number_list = target[:number_list]
+      titles = @dvd.customize_title(base_dst_name, number_list)
+      actual = titles.transpose[1]
+      assert_equal(expected, actual)
+    end
+  end
+
+  sub_test_case "Extension of number list" do
+    setup do
+      @dvd = Dvdvrconv::Dvdvr.new
+      @dvd.vrdisc.opts_ifo = "test/DVD_RTAV//VR_MANGR.IFO"
+      @dvd.vrdisc.num = [["1"], ["2"], ["3"], ["4"], ["5"]]
+      @dvd.vrdisc.title = [["bar"], ["TEST"], ["TEST"], ["TEST"], ["foo"]]
+      @dvd.vrdisc.concat_mode = false
+      @dvd.adjust_title
+    end
+
+    data(
+      "Include numbers and strings in the number list." => [
+        ["name_10.vob", "name_15.vob", "name_20.vob", "name_25-30.vob", "name_Foo-40.vob"],
+        { base_dst_name: "name",
+          number_list: [10, 15, 20, "25-30", "Foo-40"] },
+      ],
+    )
+
+    def test_customize_title_to_specify_numbers(data)
       expected, target = data
       base_dst_name = target[:base_dst_name]
       number_list = target[:number_list]

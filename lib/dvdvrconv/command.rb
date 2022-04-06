@@ -48,6 +48,12 @@ module Dvdvrconv
         dvd.vrdisc.cmd = @options[:dvd_vr_cmd] if @options[:dvd_vr_cmd]
       end
 
+      if @options[:concat_mode].nil?
+        dvd.vrdisc.concat_mode = Dvdvrconv::DEFAULT_CONCAT_MODE
+      else
+        dvd.vrdisc.concat_mode = @options[:concat_mode]
+      end
+
       # View the path of each files
       puts "== Use these paths =="
       puts "  => VR_MANGR.IFO: #{dvd.vrdisc.opts_ifo}"
@@ -57,7 +63,8 @@ module Dvdvrconv
       puts "  => use_customize_title: #{@options[:use_customize_title]}"
       puts "  => base_dst_name: #{@options[:base_dst_name]}"
       puts "  => number_list: #{@options[:number_list]}"
-      
+      puts "  => concat_mode: #{@options[:concat_mode]}"
+
       dvd.read_info
 
       dvd.view_info if options[:opt][:info] || options[:opt].empty?
@@ -72,8 +79,11 @@ module Dvdvrconv
       dvd.rename_vob
 
       # Concatenate Split titles
-      concat_list = dvd.make_concat_list
-      dvd.concat_titles(concat_list)
+      if dvd.vrdisc.concat_mode == true
+        puts "== Concatenate Split titles =="
+        concat_list = dvd.make_concat_list
+        dvd.concat_titles(concat_list)
+      end
 
       # customize title of vob files
       case @options[:use_customize_title]
@@ -115,6 +125,7 @@ module Dvdvrconv
           puts "ERROR: number_list should be an Array."
           exit
         end
+
       else
         puts "No customize file names"
         base_dst_name = dvd.vrdisc.title.uniq.map { |file| file[0].gsub(/\s/, "_") }
@@ -150,6 +161,12 @@ module Dvdvrconv
       @options[:use_customize_title] = config["use_customize_title"] || "no"
       @options[:base_dst_name] = config["base_dst_name"] || []
       @options[:number_list] = config["number_list"] || []
+
+      if config["concat_mode"].nil?
+        @options[:concat_mode] = Dvdvrconv::DEFAULT_CONCAT_MODE
+      else
+        @options[:concat_mode] = config["concat_mode"]  
+      end
     end
 
     def dvdpath
