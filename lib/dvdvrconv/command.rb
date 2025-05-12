@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Dvdvrconv
   class Command
     def self.run(argv)
@@ -54,22 +56,29 @@ module Dvdvrconv
         dvd.vrdisc.concat_mode = @options[:concat_mode]
       end
 
+      if @options[:hardware_encode].nil?
+        dvd.vrdisc.hardware_encode = DEFAULT_HARDWARE_ENCODE
+      else
+        dvd.vrdisc.hardware_encode = @options[:hardware_encode]
+      end
+
       # View the path of each files
-      puts "== Use these paths =="
-      puts "  => VR_MANGR.IFO: #{dvd.vrdisc.opts_ifo}"
-      puts "  => VR_MOVIE.VRO #{dvd.vrdisc.opts_vro}"
-      puts "  => dvd-vr.exe: #{dvd.vrdisc.cmd}"
-      puts "== Customize settings =="
+      puts '== Use these paths =='
+      puts "  => VR_MANGR.IFO:        #{dvd.vrdisc.opts_ifo}"
+      puts "  => VR_MOVIE.VRO:        #{dvd.vrdisc.opts_vro}"
+      puts "  => dvd-vr.exe:          #{dvd.vrdisc.cmd}"
+      puts '== Customize settings =='
       puts "  => use_customize_title: #{@options[:use_customize_title]}"
-      puts "  => base_dst_name: #{@options[:base_dst_name]}"
-      puts "  => number_list: #{@options[:number_list]}"
-      puts "  => concat_mode: #{@options[:concat_mode]}"
+      puts "  => base_dst_name:       #{@options[:base_dst_name]}"
+      puts "  => number_list:         #{@options[:number_list]}"
+      puts "  => concat_mode:         #{@options[:concat_mode]}"
+      puts "  => hardware_encode:     #{@options[:hardware_encode]}"
 
       dvd.read_info
 
       dvd.view_info if options[:opt][:info] || options[:opt].empty?
       exit unless options[:opt][:exec]
-      
+
       # Extract vob files
       dvd.adjust_title
       dvd.vro2vob
@@ -80,7 +89,7 @@ module Dvdvrconv
 
       # Concatenate Split titles
       if dvd.vrdisc.concat_mode == true
-        puts "== Concatenate Split titles =="
+        puts '== Concatenate Split titles =='
         concat_list = dvd.make_concat_list
         dvd.concat_titles(concat_list)
       end
@@ -88,7 +97,7 @@ module Dvdvrconv
       # customize title of vob files
       case @options[:use_customize_title]
       when 1
-        puts "Specify individual file names."
+        puts 'Specify individual file names.'
 
         if @options[:base_dst_name].class == Array
           base_dst_name = @options[:base_dst_name]
@@ -99,7 +108,7 @@ module Dvdvrconv
 
         number_list = []
       when 2
-        puts "Add sequence number to the file name."
+        puts 'Add sequence number to the file name.'
 
         if @options[:base_dst_name].class == String
           base_dst_name = @options[:base_dst_name]
@@ -110,7 +119,7 @@ module Dvdvrconv
 
         number_list = []
       when 3
-        puts "Specify sequence numbers individually."
+        puts 'Specify sequence numbers individually.'
 
         if @options[:base_dst_name].class == String
           base_dst_name = @options[:base_dst_name]
@@ -122,13 +131,13 @@ module Dvdvrconv
         if @options[:number_list].class == Array
           number_list = @options[:number_list]
         else
-          puts "ERROR: number_list should be an Array."
+          puts 'ERROR: number_list should be an Array.'
           exit
         end
 
       else
-        puts "No customize file names"
-        base_dst_name = dvd.vrdisc.title.uniq.map { |file| file[0].gsub(/\s/, "_") }
+        puts 'No customize file names'
+        base_dst_name = dvd.vrdisc.title.uniq.map { |file| file[0].gsub(/\s/, '_') }
         number_list = []
       end
 
@@ -141,9 +150,9 @@ module Dvdvrconv
 
     # load yaml file and store in @options.
     def load_config(file)
-      config = YAML.load(File.read(file)) || {}
+      config = YAML.safe_load(File.read(file)) || {}
 
-      %w(vr_mangr_ifo vr_movie_vro dvd_vr_cmd).each do |key|
+      %w[vr_mangr_ifo vr_movie_vro dvd_vr_cmd].each do |key|
         @options[key.to_sym] = nil
 
         unless config.key?(key)
@@ -158,14 +167,20 @@ module Dvdvrconv
 
       end
 
-      @options[:use_customize_title] = config["use_customize_title"] || "no"
-      @options[:base_dst_name] = config["base_dst_name"] || []
-      @options[:number_list] = config["number_list"] || []
+      @options[:use_customize_title] = config['use_customize_title'] || 'no'
+      @options[:base_dst_name] = config['base_dst_name'] || []
+      @options[:number_list] = config['number_list'] || []
 
-      if config["concat_mode"].nil?
+      if config['concat_mode'].nil?
         @options[:concat_mode] = Dvdvrconv::DEFAULT_CONCAT_MODE
       else
-        @options[:concat_mode] = config["concat_mode"]  
+        @options[:concat_mode] = config['concat_mode']
+      end
+
+      if config['hardware_encode'].nil?
+        @options[:hardware_encode] = 'normal'
+      else
+        @options[:hardware_encode] = config['hardware_encode']
       end
     end
 
@@ -174,7 +189,7 @@ module Dvdvrconv
         :vr_mangr_ifo => @options[:vr_mangr_ifo],
         :vr_movie_vro => @options[:vr_movie_vro],
         :dvd_vr_cmd => @options[:dvd_vr_cmd]
-      } 
+      }
     end
   end
 end
