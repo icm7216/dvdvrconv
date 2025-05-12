@@ -95,7 +95,7 @@ module Dvdvrconv
       cmd += "-i #{file_name}.vob "
       cmd += '-filter:v "crop=704:474:0:0" '
       cmd += '-c:v h264_qsv '
-      cmd += '-global_quality:v 27 '
+      cmd += '-global_quality:v 35 '
       cmd += '-look_ahead 1 '
       cmd += '-aspect 16:9 '
       cmd += '-acodec copy '
