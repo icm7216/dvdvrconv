@@ -19,13 +19,15 @@ module Dvdvrconv
     :default_opts_vro,  # @param [String]
     :default_cmd,       # @param [String]
     :concat_mode,       # @param [Boolean]
-    :hardware_encode    # @param [String]
+    :hardware_encode,   # @param [String]
+    :global_quality     # @param [Integer]
   )
 
   BASE_NAME = 'DVD'
   DEFAULT_CONFIG_FILE = 'default_dvdvrconv.yml'
   DEFAULT_CONCAT_MODE = true
   DEFAULT_HARDWARE_ENCODE = 'normal'
+  DEFAULT_GLOBAL_QUALITY = 25
 
   # Default DVD drive is "d".
   # If you want to use a different drive, you need to set up a "default_dvdvrconv.yml" file.
@@ -57,6 +59,7 @@ module Dvdvrconv
       @vrdisc.default_cmd = @vrdisc.cmd
       @vrdisc.concat_mode = Dvdvrconv::DEFAULT_CONCAT_MODE
       @vrdisc.hardware_encode = Dvdvrconv::DEFAULT_HARDWARE_ENCODE
+      @vrdisc.global_quality = Dvdvrconv::DEFAULT_GLOBAL_QUALITY
     end
 
     # Read VRO file from dvd-ram disc in dvd-vr format, and output vob files.
@@ -95,7 +98,7 @@ module Dvdvrconv
       cmd += "-i #{file_name}.vob "
       cmd += '-filter:v "crop=704:474:0:0" '
       cmd += '-c:v h264_qsv '
-      cmd += '-global_quality:v 35 '
+      cmd += "-global_quality #{@vrdisc.global_quality} "
       cmd += '-look_ahead 1 '
       cmd += '-aspect 16:9 '
       cmd += '-acodec copy '
@@ -151,7 +154,7 @@ module Dvdvrconv
       puts @vrdisc.header
       [@vrdisc.num, @vrdisc.title, @vrdisc.date, @vrdisc.size].transpose.each do |x|
         %w[num title date size].each_with_index do |item, idx|
-          line = format('%-5s', item) + ": #{x.flatten[idx].to_s}\n"
+          line = format('%-5s', item) + ": #{x.flatten[idx]}\n"
           puts line
         end
         puts '-'
@@ -369,7 +372,7 @@ module Dvdvrconv
 
     def vrdisc_status
       puts "\n< < < < < @vrdisc status > > > > >"
-      %w[num title output_title duplicate_name vob_titles concat_mode hardware_encode].each do |item|
+      %w[num title output_title duplicate_name vob_titles concat_mode hardware_encode global_quality].each do |item|
         puts "#{item}=> #{@vrdisc[item]}"
       end
       puts "< < < < < @vrdisc status > > > > >\n"

@@ -62,6 +62,12 @@ module Dvdvrconv
         dvd.vrdisc.hardware_encode = @options[:hardware_encode]
       end
 
+      if @options[:global_quality].nil?
+        dvd.vrdisc.global_quality = Dvdvrconv::DEFAULT_GLOBAL_QUALITY
+      else
+        dvd.vrdisc.global_quality = @options[:global_quality]
+      end
+
       # View the path of each files
       puts '== Use these paths =='
       puts "  => VR_MANGR.IFO:        #{dvd.vrdisc.opts_ifo}"
@@ -73,6 +79,7 @@ module Dvdvrconv
       puts "  => number_list:         #{@options[:number_list]}"
       puts "  => concat_mode:         #{@options[:concat_mode]}"
       puts "  => hardware_encode:     #{@options[:hardware_encode]}"
+      puts "  => global_quality:      #{@options[:global_quality]}"
 
       dvd.read_info
 
@@ -181,6 +188,12 @@ module Dvdvrconv
         @options[:hardware_encode] = 'normal'
       else
         @options[:hardware_encode] = config['hardware_encode']
+      end
+
+      if config['global_quality'].nil?
+        @options[:global_quality] = Dvdvrconv::DEFAULT_GLOBAL_QUALITY
+      else
+        @options[:global_quality] = config['global_quality']
       end
     end
 
