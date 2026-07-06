@@ -175,6 +175,13 @@ class DvdvrconvTest < Test::Unit::TestCase
         { output_title: ['TEST_1', 'TEST_2', 'TEST_3', 'T_EST_01', 'T_EST_02', 'T_EST_03', 'foo_01', 'foo_02', 'foo_03'],
           duplicate_name: ['T_EST', 'foo'] },
       ],
+      "Escape apostrophes for ffmpeg's concat format" => [
+        [["concat_Foo\'s.txt",
+          "file 'Foo'\\''s_01.vob'\nfile 'Foo'\\''s_02.vob'\n",
+          "Foo's"]],
+        { output_title: ["Foo's_01", "Foo's_02"],
+          duplicate_name: ["Foo's"] },
+      ]
     )
 
     def test_concat_list(data)
@@ -219,6 +226,35 @@ class DvdvrconvTest < Test::Unit::TestCase
         :dvd_vr_cmd => './win/dvd-vr.exe',
       }
       assert_equal expected, @dvdcmd.dvdpath
+    end
+  end
+
+  sub_test_case 'generate command arrays' do
+    setup do
+      @dvd = Dvdvrconv::Dvdvr.new
+      @dvd.vrdisc.cmd = '/usr/bin/dvd vr'
+      @dvd.vrdisc.opts_ifo = '/path/to/my folder/VR_MANGR.IFO'
+      @dvd.vrdisc.opts_vro = '/path/to/my folder/VR_MOVIE.VRO'
+      @dvd.vrdisc.global_quality = 25
+    end
+
+    test 'str_dvdvr_cmd splits correctly with spaces' do
+      expected = ['/usr/bin/dvd vr', '--name=DVD', '/path/to/my folder/VR_MANGR.IFO', '/path/to/my folder/VR_MOVIE.VRO']
+      assert_equal expected, @dvd.str_dvdvr_cmd
+    end
+
+    test 'ffmeg_normal_cmd splits correctly' do
+      cmd = @dvd.ffmeg_normal_cmd('my video')
+      assert_equal 'my video.vob', cmd[2]                 # argument following '-i'
+      assert_equal 'crop=704:474:0:0', cmd[4]             # argument following '-filter:v'
+      assert_equal 'filter_units=remove_types=6', cmd[14] # argument following '-bsf:v'
+      assert_equal 'my video.mp4', cmd[15]                # output file name
+    end
+
+    test 'ffmpeg_qsv_cmd splits correctly' do
+      cmd = @dvd.ffmpeg_qsv_cmd('my video')
+      # Check if the value for '-global_quality' is correctly included in the array.
+      assert_equal '25', cmd[12]
     end
   end
 end

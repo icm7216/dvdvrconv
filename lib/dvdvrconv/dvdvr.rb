@@ -64,27 +64,19 @@ module Dvdvrconv
 
     # Read VRO file from dvd-ram disc in dvd-vr format, and output vob files.
     def str_dvdvr_cmd
-      %(#{@vrdisc.cmd} --name=#{Dvdvrconv::BASE_NAME} #{@vrdisc.opts_ifo} #{@vrdisc.opts_vro})
+      Shellwords.shellsplit(%("#{@vrdisc.cmd}" --name="#{Dvdvrconv::BASE_NAME}" "#{@vrdisc.opts_ifo}" "#{@vrdisc.opts_vro}"))
     end
 
     # Make a concatenation command string for FFmpeg.
     def str_concat_cmd(file_name, base_name)
-      %(ffmpeg -f concat -safe 0 -i #{file_name} -c copy #{base_name}.vob)
+      Shellwords.shellsplit(%(ffmpeg -f concat -safe 0 -i "#{file_name}" -c copy "#{base_name}.vob"))
     end
 
     # File convert command, vob to mp4 for FFmpeg.
     # * Change the aspect ratio to 16:9.
     # * Delete a closed caption.
     def ffmeg_normal_cmd(file_name)
-      cmd = 'ffmpeg '
-      cmd += "-i #{file_name}.vob "
-      cmd += '-filter:v "crop=704:474:0:0" '
-      cmd += '-vcodec libx264 '
-      cmd += '-b:v 500k '
-      cmd += '-aspect 16:9 '
-      cmd += '-acodec copy '
-      cmd += '-bsf:v "filter_units=remove_types=6" '
-      cmd + "#{file_name}.mp4"
+      Shellwords.shellsplit(%(ffmpeg -i "#{file_name}.vob" -filter:v "crop=704:474:0:0" -vcodec libx264 -b:v 500k -aspect 16:9 -acodec copy -bsf:v "filter_units=remove_types=6" "#{file_name}.mp4"))
     end
 
     # File convert command, vob to mp4 for FFmpeg.
@@ -92,18 +84,7 @@ module Dvdvrconv
     # * Change the aspect ratio to 16:9.
     # * Delete a closed caption.
     def ffmpeg_qsv_cmd(file_name)
-      cmd = 'ffmpeg '
-      cmd += '-hwaccel qsv '
-      cmd += '-hwaccel_output_format qsv '
-      cmd += "-i #{file_name}.vob "
-      cmd += '-filter:v "crop=704:474:0:0" '
-      cmd += '-c:v h264_qsv '
-      cmd += "-global_quality #{@vrdisc.global_quality} "
-      cmd += '-look_ahead 1 '
-      cmd += '-aspect 16:9 '
-      cmd += '-acodec copy '
-      cmd += '-bsf:v "filter_units=remove_types=6" '
-      cmd + "#{file_name}.mp4"
+      Shellwords.shellsplit(%(ffmpeg  -hwaccel qsv -hwaccel_output_format qsv -i "#{file_name}.vob" -filter:v "crop=704:474:0:0" -c:v h264_qsv -global_quality "#{@vrdisc.global_quality}" -look_ahead 1 -aspect 16:9 -acodec copy -bsf:v "filter_units=remove_types=6" "#{file_name}.mp4"))
     end
 
     # File convert command, vob to mp4 for FFmpeg.
@@ -205,8 +186,8 @@ module Dvdvrconv
     def vro2vob
       cmd = str_dvdvr_cmd
       puts '----- convert file VRO to VOB -----'
-      puts "> cmd:\n  #{cmd}"
-      system(cmd)
+      puts "> cmd:\n  #{cmd.join(' ')}"
+      system(*cmd)
       puts ''
     end
 
@@ -329,7 +310,10 @@ module Dvdvrconv
         file_name = "concat_#{base_name}.txt"
 
         names = @vrdisc.output_title.select { |x| x.match(/#{base_name}_\d\d/) }
-        names.each { |line| contents += "file '#{line}.vob'\n" }
+        names.each do |line|
+          escaped_line = "#{line}.vob".gsub("'") {"'\\''"}
+          contents += "file '#{escaped_line}'\n"
+        end
         concat_list << [file_name, contents, base_name]
       end
 
@@ -359,8 +343,8 @@ module Dvdvrconv
 
         cmd = str_concat_cmd(file_name, base_name)
         puts '----- concat vob files -----'
-        puts "run cmd:\n  #{cmd}"
-        system(cmd)
+        puts "run cmd:\n  #{cmd.join(' ')}"
+        system(*cmd)
 
         begin
           File.delete(file_name)
@@ -396,8 +380,8 @@ module Dvdvrconv
         else
           cmd = str_convert_cmd(file_name)
           puts "----- convert #{file_name}.vob to mp4 file -----"
-          puts "run cmd:\n  #{cmd}"
-          system(cmd)
+          puts "run cmd:\n  #{cmd.join(' ')}"
+          system(*cmd)
         end
       end
     end
