@@ -3,6 +3,7 @@
 require 'open3'
 require 'optparse'
 require 'yaml'
+require 'shellwords'
 
 require_relative 'dvdvrconv/command'
 require_relative 'dvdvrconv/options'
