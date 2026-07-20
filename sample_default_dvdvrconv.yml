@@ -47,3 +47,38 @@ base_dst_name:
   - title_three
 
 number_list: []
+
+
+##################################################
+# 
+# FFmpeg encode option
+#
+# You can select the encoding mode from 'normal' or 'qsv'.
+#
+# if you want to use a software encoder (default)
+#   
+#   hardware_encode: 'normal'
+# 
+# 
+# If you want to use a hardware encoder(intel QSV LA_ICQ)
+# 
+#   hardware_encode: 'qsv'
+# 
+#
+##################################################
+# 
+# software encode option
+# 
+# if you want to set h264 Constant Rate Factor (default 25)
+# 
+#   h264_crf: 28
+# 
+# 
+# hardware encode option
+#
+# if you want to set Global Quality (default 25)
+# 
+#   global_quality: 28
+# 
+# 
+##################################################

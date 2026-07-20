@@ -20,7 +20,8 @@ module Dvdvrconv
     :default_cmd,       # @param [String]
     :concat_mode,       # @param [Boolean]
     :hardware_encode,   # @param [String]
-    :global_quality     # @param [Integer]
+    :global_quality,    # @param [Integer]
+    :h264_crf,          # @param [Integer]
   )
 
   BASE_NAME = 'DVD'
@@ -28,6 +29,8 @@ module Dvdvrconv
   DEFAULT_CONCAT_MODE = true
   DEFAULT_HARDWARE_ENCODE = 'normal'
   DEFAULT_GLOBAL_QUALITY = 25
+  DEFAULT_H264_CRF = 25
+
 
   # Default DVD drive is "d".
   # If you want to use a different drive, you need to set up a "default_dvdvrconv.yml" file.
@@ -60,6 +63,7 @@ module Dvdvrconv
       @vrdisc.concat_mode = Dvdvrconv::DEFAULT_CONCAT_MODE
       @vrdisc.hardware_encode = Dvdvrconv::DEFAULT_HARDWARE_ENCODE
       @vrdisc.global_quality = Dvdvrconv::DEFAULT_GLOBAL_QUALITY
+      @vrdisc.h264_crf = Dvdvrconv::DEFAULT_H264_CRF
     end
 
     # Read VRO file from dvd-ram disc in dvd-vr format, and output vob files.
@@ -75,16 +79,23 @@ module Dvdvrconv
     # File convert command, vob to mp4 for FFmpeg.
     # * Change the aspect ratio to 16:9.
     # * Delete a closed caption.
+    # * Use deinterlace (bwdif)
+    # * Use Constant Rate Factor mode insted of CBR mode
+    # * Use analyze and probe option
     def ffmeg_normal_cmd(file_name)
-      Shellwords.shellsplit(%(ffmpeg -i "#{file_name}.vob" -filter:v "crop=704:474:0:0" -vcodec libx264 -b:v 500k -aspect 16:9 -acodec copy -bsf:v "filter_units=remove_types=6" "#{file_name}.mp4"))
+      Shellwords.shellsplit(%(ffmpeg -analyzeduration 2000M -probesize 2G -i "#{file_name}.vob" -vf "bwdif=0:-1:0,crop=704:474:0:0,scale=704:480,setdar=16/9" -c:v libx264 -crf "#{@vrdisc.h264_crf}" -preset medium -bsf:v "filter_units=remove_types=6" -map 0:v:0 -map 0:a:0 -c:a copy "#{file_name}.mp4"))
     end
 
     # File convert command, vob to mp4 for FFmpeg.
     # * FFmpeg with QSV(Intel Quick Sync Video)
     # * Change the aspect ratio to 16:9.
     # * Delete a closed caption.
+    # * Support for FFmpeg 8
+    # * Software decode, cropp and deinterlace + h264 qsv(LA_ICQ) encode
+    # * Use ICQ Look_ahead mode
+    # * Use analyze and probe option
     def ffmpeg_qsv_cmd(file_name)
-      Shellwords.shellsplit(%(ffmpeg  -hwaccel qsv -hwaccel_output_format qsv -i "#{file_name}.vob" -filter:v "crop=704:474:0:0" -c:v h264_qsv -global_quality "#{@vrdisc.global_quality}" -look_ahead 1 -aspect 16:9 -acodec copy -bsf:v "filter_units=remove_types=6" "#{file_name}.mp4"))
+      Shellwords.shellsplit(%(ffmpeg -analyzeduration 2000M -probesize 2G -i "#{file_name}.vob" -vf "bwdif=0:-1:0,crop=704:474:0:0,scale=704:480,setdar=16/9" -c:v h264_qsv -global_quality "#{@vrdisc.global_quality}" -look_ahead 1 -look_ahead_depth 30 -aspect 16:9 -bsf:v "filter_units=remove_types=6" -map 0:v:0 -map 0:a:0 -c:a copy "#{file_name}.mp4"))
     end
 
     # File convert command, vob to mp4 for FFmpeg.
@@ -356,7 +367,7 @@ module Dvdvrconv
 
     def vrdisc_status
       puts "\n< < < < < @vrdisc status > > > > >"
-      %w[num title output_title duplicate_name vob_titles concat_mode hardware_encode global_quality].each do |item|
+      %w[num title output_title duplicate_name vob_titles concat_mode hardware_encode global_quality h264_crf].each do |item|
         puts "#{item}=> #{@vrdisc[item]}"
       end
       puts "< < < < < @vrdisc status > > > > >\n"

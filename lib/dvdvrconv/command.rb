@@ -68,6 +68,12 @@ module Dvdvrconv
         dvd.vrdisc.global_quality = @options[:global_quality]
       end
 
+      if @options[:h264_crf].nil?
+        dvd.vrdisc.h264_crf = Dvdvrconv::DEFAULT_H264_CRF
+      else
+        dvd.vrdisc.h264_crf = @options[:h264_crf]
+      end
+
       # View the path of each files
       puts '== Use these paths =='
       puts "  => VR_MANGR.IFO:        #{dvd.vrdisc.opts_ifo}"
@@ -80,6 +86,7 @@ module Dvdvrconv
       puts "  => concat_mode:         #{@options[:concat_mode]}"
       puts "  => hardware_encode:     #{@options[:hardware_encode]}"
       puts "  => global_quality:      #{@options[:global_quality]}"
+      puts "  => h264_crf:            #{@options[:h264_crf]}"
 
       dvd.read_info
 
@@ -194,6 +201,12 @@ module Dvdvrconv
         @options[:global_quality] = Dvdvrconv::DEFAULT_GLOBAL_QUALITY
       else
         @options[:global_quality] = config['global_quality']
+      end
+
+      if config['h264_crf'].nil?
+        @options[:h264_crf] = Dvdvrconv::DEFAULT_H264_CRF
+      else
+        @options[:h264_crf] = config['h264_crf']
       end
     end
 

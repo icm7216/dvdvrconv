@@ -92,6 +92,9 @@ dvdvrconv reads `default_dvdvrconv.yml` in the current working directory as dvdv
 *  use_customize_title
 *  base_dst_name
 *  number_list
+*  hardware_encode
+*  global_quality
+*  h264_crf
 
 ## vr_mangr_ifo, vr_movie_vro
 
@@ -175,7 +178,37 @@ In this case, "concat_mode" can be disabled.
 concat_mode: false
 ```
 
+## hardware_encode
 
+FFmpeg encode option. You can select the encoding mode from 'normal' or 'qsv'.
+
+if you want to use a software encoder (default)
+```
+hardware_encode: 'normal'
+```
+
+If you want to use a hardware encoder(intel QSV LA_ICQ)
+```
+hardware_encode: 'qsv'
+```
+
+## global_quality
+
+FFmpeg hardware encode(QSV) option:
+
+if you want to set Global Quality (default 25)
+```
+global_quality: 28
+```
+
+## h264_crf
+
+FFmpeg software encode option:
+
+if you want to set h264 Constant Rate Factor (default 25)
+```
+h264_crf: 28
+```
 
 
 # Install dependent libraries for WSL(ubuntu)
@@ -285,6 +318,7 @@ After compile success, you will get the following files.
 *  [FFmpeg](https://www.ffmpeg.org/download.html)
 From the Windows EXE Files link above, select the following website.
 *  [Releases · BtbN/FFmpeg-Builds](https://github.com/BtbN/FFmpeg-Builds/releases) (daily auto-build).
+*  [Releases · GyanD/codexffmpeg](https://github.com/GyanD/codexffmpeg/releases)
 
 As an example, download Auto-Build 2021-09-28 12:22.
 *  [ffmpeg-N-103899-g855014ff83-win64-gpl.zip 100MB](https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2021-09-28-12-22/ffmpeg-N-103899-g855014ff83-win64-gpl.zip)

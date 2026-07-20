@@ -236,6 +236,7 @@ class DvdvrconvTest < Test::Unit::TestCase
       @dvd.vrdisc.opts_ifo = '/path/to/my folder/VR_MANGR.IFO'
       @dvd.vrdisc.opts_vro = '/path/to/my folder/VR_MOVIE.VRO'
       @dvd.vrdisc.global_quality = 25
+      @dvd.vrdisc.h264_crf = 25
     end
 
     test 'str_dvdvr_cmd splits correctly with spaces' do
@@ -245,10 +246,10 @@ class DvdvrconvTest < Test::Unit::TestCase
 
     test 'ffmeg_normal_cmd splits correctly' do
       cmd = @dvd.ffmeg_normal_cmd('my video')
-      assert_equal 'my video.vob', cmd[2]                 # argument following '-i'
-      assert_equal 'crop=704:474:0:0', cmd[4]             # argument following '-filter:v'
-      assert_equal 'filter_units=remove_types=6', cmd[14] # argument following '-bsf:v'
-      assert_equal 'my video.mp4', cmd[15]                # output file name
+      assert_equal 'my video.vob', cmd[6]                 # argument following '-i'
+      assert_equal 'bwdif=0:-1:0,crop=704:474:0:0,scale=704:480,setdar=16/9', cmd[8]             # argument following '-vf'
+      assert_equal 'filter_units=remove_types=6', cmd[16] # argument following '-bsf:v'
+      assert_equal 'my video.mp4', cmd[23]                # output file name
     end
 
     test 'ffmpeg_qsv_cmd splits correctly' do
